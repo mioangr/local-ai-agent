@@ -1,6 +1,8 @@
 # openClaw-install
 Commands to install openClaw under linux
 
+1. Specifications
+
 <pre>
 Windows Host  
    └── VMware VM (Ubuntu Server)  
