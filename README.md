@@ -1,7 +1,7 @@
 # openClaw-install
 Commands to install openClaw under linux
 
-1. Specifications
+## Specifications
 
 <pre>
 Windows Host  
