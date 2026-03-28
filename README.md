@@ -13,8 +13,22 @@ Windows Host
          └── GitHub bot account (restricted)  
 </pre>
 
-Inside VM:
+Strcuture Inside VM:
 - keep repos:
   - ephemeral clones
 - delete after tasks  
-👉 minimizes persistence risk
+
+
+## Description of the scripts
+
+### setup_openclaw.sh
+
+#### Prerequsites
+
+#### What it does
+
+### remove_openclaw.sh
+
+#### What it does
+
+## Next pending tasks to complete the purpose of this repository 
