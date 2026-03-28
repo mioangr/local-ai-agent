@@ -12,6 +12,6 @@ Windows Host
 
 Inside VM:
 - keep repos:
--- ephemeral clones
+  - ephemeral clones
 - delete after tasks  
 👉 minimizes persistence risk
