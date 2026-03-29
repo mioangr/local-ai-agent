@@ -5,6 +5,10 @@ Infrastructure as code for a **local AI agent environment** using OpenClaw.
 This repository provides a **reproducible, script-based setup** to deploy an isolated AI agent inside a virtual machine, with controlled access to system resources and GitHub.
 
 ---
+# 🎯 Purpose
+An AI or AI agent that can collaborate with me on a public or private repository to write software or complete other writing tasks (e.g. a book).  
+It should be able to accept instructions via email or a chat window.  
+It should have the capability to build a software from the specifications alone. Or write a book using the instructions on the content and the description of the audience.
 
 # 🎯 Goal
 
