@@ -21,15 +21,6 @@ Send instructions via **email or chat**, and your AI agent will:
 - ✅ Submit work as PRs for your review before merging
 
 
-# 🎯 Goal
-
-Create a **secure, portable, reproducible environment** where an AI agent (e.g. OpenClaw) can:
-
-* execute commands
-* write and modify code
-* interact with a GitHub repository
-* run inside a controlled sandbox (VM + Docker)
-
 ---
 
 # 🧱 Architecture Overview
@@ -38,9 +29,11 @@ Create a **secure, portable, reproducible environment** where an AI agent (e.g. 
 Windows Host  
    └── VMware VM (Ubuntu Server)  
          ├── Docker  
-         │     └── OpenClaw  
+         │     └── AI agent (e.g. OpenClaw)  
          ├── Limited filesystem access  
          └── GitHub bot account (restricted)
+
+To define: where the other local AI component will reside? In separate dockers? Which AI components are needed? Which AI agent should be used? 
 ```
 
 ---
@@ -72,10 +65,14 @@ This setup is designed with **practical isolation**:
 * VMware Workstation or VMware Fusion
 * Ubuntu Server installed inside VM
 * Internet access inside VM
+* Linux security hardening and extra packages were installed with the script linux-initial-config.sh
+* A "Golden image" is created for this state of linux so it can be reused in the next steps (installation of Docker and AI components)
 
 ---
+## 2. Selected components and reasoning for their choice.
 
-## 2. Run Setup Script
+
+## 3. Run Setup Script
 
 Download and execute:
 
@@ -252,24 +249,10 @@ Planned improvements:
 * auto-cleanup after runs
 * audit logs of agent actions
 
-### ⚙️ Script Improvements
 
-* split mega script into modules again
-* better validation and error handling
-* optional configuration file instead of inline variables
 
 ---
 
-# 🧭 Long-Term Vision
-
-A **portable AI development environment** where:
-
-* the agent can safely collaborate on code
-* the system is reproducible on any machine
-* risk is contained within VM boundaries
-* experimentation is fast and reversible
-
----
 
 # 🧠 Context for Future Development (AI Memory)
 
