@@ -2,7 +2,7 @@
 
 Instructions and scripts to install a **local AI and AI agent environment**.
 
-This repository provides a **reproducible, script-based  (to the extent possible) setup** to deploy an isolated AI and AI agent inside a virtual machine, with controlled access to system resources and GitHub.
+This repository provides a **reproducible, script-based (to the extent possible) setup** to deploy an isolated AI and AI agent inside a virtual machine, with controlled access to system resources and GitHub.
 
 ---
 # 🎯 Purpose
@@ -19,8 +19,6 @@ Send instructions via **email or chat**, and your AI agent will:
 - 📝 Accept multi-channel instructions (email, REST API, web UI)
 - 🔐 Keep all work private and local (using DeepSeek)
 - ✅ Submit work as PRs for your review before merging
-
----
 
 
 # 🔐 Security Model
@@ -61,8 +59,8 @@ To achieve the stated goals, the following components are required:
 - **`.env` secrets management**: Secure credential storage without GitHub exposure
 
 ## AI & LLM Layer
-- **DeepSeek** (or compatible local LLM): Runs locally in Docker for privacy; can build software from specifications and generate written content
-- **OpenClaw** (or alternative agent framework): Orchestrates interactions with GitHub, filesystem, and command execution
+- **DeepSeek** (via Ollama in a separate container): Runs locally, can build software from specifications and generate written content
+- **LangGraph** (Python framework): Orchestrates interactions with GitHub, filesystem, and command execution. More flexible and easier to customise than black‑box agents.
 
 ## Integration & Communication Layer
 - **GitHub API & Git**: For repository interaction, PR workflow, and code version control
@@ -79,18 +77,59 @@ To achieve the stated goals, the following components are required:
 ## Reasoning
 Each component directly supports one or more goals:
 - Local LLM → Privacy requirement
-- Agent framework → Automation of software building and writing tasks
+- LangGraph → Full control over automation of software building and writing tasks
 - GitHub integration → Collaboration workflow
 - Docker + VM → Security model requirement
 - Multi-channel input → Flexibility of instruction delivery
 - PR workflow → Quality control and human oversight
 
----
-
-
-
 
 # 🧱 Architecture Overview
+
+## High-Level Diagram
+```
+┌─────────────────────────────────────────────────────────────────┐
+│ Windows Host                                                    │
+│ (VMware Workstation/Fusion)                                     │
+│                                                                 │
+│ ┌────────────────────────────────────────────────────────────┐  │
+│ │ Ubuntu Server VM (Golden Image)                            │  │
+│ │                                                            │  │
+│ │ ┌──────────────────────────────────────────────────────┐   │  │
+│ │ │ Docker Engine                                        │   │  │
+│ │ │                                                      │   │  │
+│ │ │ ┌───────────────────┐      ┌────────────────────┐    │   │  │
+│ │ │ │ Agent Container   │      │ LLM Container      │    │   │  │
+│ │ │ │ (LangGraph)       │◄────►│ (Ollama + DeepSeek)     │   │  │
+│ │ │ │                   │ HTTP │                    │    │   │  │
+│ │ │ │ - GitHub CLI/Git  │      │ - Model serving    │    │   │  │
+│ │ │ │ - Command exec    │      │ - Quantized weights│    │   │  │
+│ │ │ │ - File sandbox    │      └────────────────────┘    │   │  │
+│ │ │ └─────────┬─────────┘                                │   │  │
+│ │ │ │ │ │ │
+│ │ │ ┌─────────▼─────────┐ ┌────────────────────┐ │ │ │
+│ │ │ │ API Gateway │ │ Redis/Volume │ │ │ │
+│ │ │ │ (FastAPI) │ │ (state & logs) │ │ │ │
+│ │ │ └─────────┬─────────┘ └────────────────────┘ │ │ │
+│ │ │ │ │ │ │
+│ │ └────────────┼─────────────────────────────────────────┘ │ │
+│ │ │ │ │
+│ │ ┌────────────▼────────────────────────────────────────┐ │ │
+│ │ │ Host Volumes (bind mounts) │ │ │
+│ │ │ - /home/aiuser/workspace (ephemeral clones) │ │ │
+│ │ │ - /home/aiuser/.env (secrets, read-only) │ │ │
+│ │ └─────────────────────────────────────────────────────┘ │ │
+│ │ │ │
+│ │ ┌─────────────────────────────────────────────────────┐ │ │
+│ │ │ External Access (controlled) │ │ │
+│ │ │ - Outbound HTTPS to GitHub API │ │ │
+│ │ │ - Inbound from email (via SMTP relay or webhook) │ │ │
+│ │ │ - Inbound from chat (Matrix/Telegram webhook) │ │ │
+│ │ └─────────────────────────────────────────────────────┘ │ │
+│ └────────────────────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────────┘
+```
+
 ToDo: update
 ```
 Windows Host  
@@ -103,6 +142,43 @@ Windows Host
 To define: where the other local AI component will reside? In separate dockers? Which AI components are needed? Which AI agent should be used? 
 ```
 
+## Component Placement & Responsibilities
+
+| Component          | Location               | Purpose                                                                 |
+|--------------------|------------------------|-------------------------------------------------------------------------|
+| **Agent** (LangGraph) | Docker container       | Orchestrates tasks: clones repos, runs LLM queries, executes commands, creates PRs. |
+| **LLM** (DeepSeek via Ollama) | Separate Docker container | Serves model locally over HTTP. No internet needed after download.      |
+| **API Gateway**      | Separate container (FastAPI) | Receives instructions from email (via webhook), chat, or REST. Queues tasks for agent. |
+| **Redis / Volume**   | Docker volume          | Stores conversation memory, task queues, audit logs.          |
+| **Workspace**        | Host bind mount (`/home/aiuser/workspace`) | Ephemeral clones of repos; cleared after each run or PR.                |
+| **Secrets**          | Host file `.env` (600 perms) | Injected as environment variables into agent container (read-only).     |
+
+## Network & Security Rules
+
+- Agent container **can only**:
+  - Talk to LLM container (internal Docker network)
+  - Talk to GitHub API (outbound HTTPS)
+  - Talk to API Gateway (if same network)
+  - Read/write within `/workspace` bind mount
+- Agent container **cannot**:
+  - Access host network except for above
+  - Modify its own environment or Docker socket (unless explicitly needed – not recommended)
+- All inbound instructions (email/chat) land on the API Gateway, which validates a simple secret before forwarding to the agent.
+
+## How Multi-Channel Instructions Flow
+
+1. **Email** → (optional) Postfix relay + script → HTTP POST to API Gateway.
+2. **Chat** → Matrix/Telegram bot → HTTP POST to API Gateway.
+3. **REST** → Direct `curl` or webhook → API Gateway.
+
+The gateway writes a task to Redis queue; the agent polls or listens, executes, and pushes results back (e.g., PR link, written chapters).
+
+## Missing Pieces (to be added in future)
+
+- Command approval layer (human-in-the-loop for dangerous commands)
+- Resource limits (CPU/RAM for agent & LLM containers)
+- Automatic cleanup of workspace after PR merge
+  
 ---
 
 # ⚙️ Setup Instructions
