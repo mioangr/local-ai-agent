@@ -23,22 +23,8 @@ Send instructions via **email or chat**, and your AI agent will:
 
 ---
 
-# 🧱 Architecture Overview
 
-```
-Windows Host  
-   └── VMware VM (Ubuntu Server)  
-         ├── Docker  
-         │     └── AI agent (e.g. OpenClaw)  
-         ├── Limited filesystem access  
-         └── GitHub bot account (restricted)
-
-To define: where the other local AI component will reside? In separate dockers? Which AI components are needed? Which AI agent should be used? 
-```
-
----
-
-# 🔐 Security Model (Important)
+# 🔐 Security Model
 
 This setup is designed with **practical isolation**:
 
@@ -57,6 +43,27 @@ This setup is designed with **practical isolation**:
 
 ---
 
+# Selected components and reasoning for their choice.
+The following components (AI and helper components) are needed to build such a system:
+ToDo: reseach to build the list of components.
+
+---
+
+# 🧱 Architecture Overview
+ToDo: update
+```
+Windows Host  
+   └── VMware VM (Ubuntu Server)  
+         ├── Docker  
+         │     └── AI agent (e.g. OpenClaw)  
+         ├── Limited filesystem access  
+         └── GitHub bot account (restricted)
+
+To define: where the other local AI component will reside? In separate dockers? Which AI components are needed? Which AI agent should be used? 
+```
+
+---
+
 # ⚙️ Setup Instructions
 
 ## 1. Prerequisites
@@ -69,10 +76,10 @@ This setup is designed with **practical isolation**:
 * A "Golden image" is created for this state of linux so it can be reused in the next steps (installation of Docker and AI components)
 
 ---
-## 2. Selected components and reasoning for their choice.
 
 
-## 3. Run Setup Script
+
+## 2. Run Setup Script
 
 Download and execute:
 
