@@ -100,58 +100,46 @@ Each component directly supports one or more goals:
 │ │ │                                                      │   │  │
 │ │ │ ┌───────────────────┐      ┌────────────────────┐    │   │  │
 │ │ │ │ Agent Container   │      │ LLM Container      │    │   │  │
-│ │ │ │ (LangGraph)       │◄────►│ (Ollama + DeepSeek)     │   │  │
+│ │ │ │ (LangGraph)       │◄────►│ (Ollama + DeepSeek)|    │   │  │
 │ │ │ │                   │ HTTP │                    │    │   │  │
 │ │ │ │ - GitHub CLI/Git  │      │ - Model serving    │    │   │  │
 │ │ │ │ - Command exec    │      │ - Quantized weights│    │   │  │
 │ │ │ │ - File sandbox    │      └────────────────────┘    │   │  │
 │ │ │ └─────────┬─────────┘                                │   │  │
-│ │ │ │ │ │ │
-│ │ │ ┌─────────▼─────────┐ ┌────────────────────┐ │ │ │
-│ │ │ │ API Gateway │ │ Redis/Volume │ │ │ │
-│ │ │ │ (FastAPI) │ │ (state & logs) │ │ │ │
-│ │ │ └─────────┬─────────┘ └────────────────────┘ │ │ │
-│ │ │ │ │ │ │
-│ │ └────────────┼─────────────────────────────────────────┘ │ │
-│ │ │ │ │
-│ │ ┌────────────▼────────────────────────────────────────┐ │ │
-│ │ │ Host Volumes (bind mounts) │ │ │
-│ │ │ - /home/aiuser/workspace (ephemeral clones) │ │ │
-│ │ │ - /home/aiuser/.env (secrets, read-only) │ │ │
-│ │ └─────────────────────────────────────────────────────┘ │ │
-│ │ │ │
-│ │ ┌─────────────────────────────────────────────────────┐ │ │
-│ │ │ External Access (controlled) │ │ │
-│ │ │ - Outbound HTTPS to GitHub API │ │ │
-│ │ │ - Inbound from email (via SMTP relay or webhook) │ │ │
-│ │ │ - Inbound from chat (Matrix/Telegram webhook) │ │ │
-│ │ └─────────────────────────────────────────────────────┘ │ │
-│ └────────────────────────────────────────────────────────────┘ │
+│ │ │           │                                          │   │  │
+│ │ │ ┌─────────▼─────────┐ ┌────────────────────┐         │   │  │
+│ │ │ │ API Gateway       │ │ Redis/Volume       │         │   │  │
+│ │ │ │ (FastAPI)         │ │ (state & logs)     │         │   │  │
+│ │ │ └─────────┬─────────┘ └────────────────────┘         │   │  │
+│ │ │           │                                          │   │  │
+│ │ └───────────┼──────────────────────────────────────────┘   │  │
+│ │             │                                              │  │
+│ │ ┌───────────▼─────────────────────────────────────────┐    │  │
+│ │ │ Host Volumes (bind mounts)                          │    │  │
+│ │ │ - /home/aiuser/workspace (ephemeral clones)         │    │  │
+│ │ │ - /home/aiuser/.env (secrets, read-only)            │    │  │
+│ │ └─────────────────────────────────────────────────────┘    │  │
+│ │                                                            │  │
+│ │ ┌─────────────────────────────────────────────────────┐    │  │
+│ │ │ External Access (controlled)                        │    │  │
+│ │ │ - Outbound HTTPS to GitHub API                      │    │  │
+│ │ │ - Inbound from email (via SMTP relay or webhook)    │    │  │
+│ │ │ - Inbound from chat (Matrix/Telegram webhook)       │    │  │
+│ │ └─────────────────────────────────────────────────────┘    │  │
+│ └────────────────────────────────────────────────────────────┘  │
 └─────────────────────────────────────────────────────────────────┘
-```
-
-ToDo: update
-```
-Windows Host  
-   └── VMware VM (Ubuntu Server)  
-         ├── Docker  
-         │     └── AI agent (e.g. OpenClaw)  
-         ├── Limited filesystem access  
-         └── GitHub bot account (restricted)
-
-To define: where the other local AI component will reside? In separate dockers? Which AI components are needed? Which AI agent should be used? 
 ```
 
 ## Component Placement & Responsibilities
 
-| Component          | Location               | Purpose                                                                 |
-|--------------------|------------------------|-------------------------------------------------------------------------|
+| Component          | Location               | Purpose                                                            |
+|--------------------|------------------------|------------------------------------------------------------------------|
 | **Agent** (LangGraph) | Docker container       | Orchestrates tasks: clones repos, runs LLM queries, executes commands, creates PRs. |
 | **LLM** (DeepSeek via Ollama) | Separate Docker container | Serves model locally over HTTP. No internet needed after download.      |
 | **API Gateway**      | Separate container (FastAPI) | Receives instructions from email (via webhook), chat, or REST. Queues tasks for agent. |
-| **Redis / Volume**   | Docker volume          | Stores conversation memory, task queues, audit logs.          |
-| **Workspace**        | Host bind mount (`/home/aiuser/workspace`) | Ephemeral clones of repos; cleared after each run or PR.                |
-| **Secrets**          | Host file `.env` (600 perms) | Injected as environment variables into agent container (read-only).     |
+| **Redis / Volume**   | Docker volume          | Stores conversation memory, task queues, audit logs.     |
+| **Workspace**        | Host bind mount (`/home/aiuser/workspace`) | Ephemeral clones of repos; cleared after each run or PR |
+| **Secrets**          | Host file `.env` (600 perms) | Injected as environment variables into agent container (read-only). |
 
 ## Network & Security Rules
 
