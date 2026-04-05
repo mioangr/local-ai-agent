@@ -1,18 +1,19 @@
-# openClaw-install
+# local-ai-install
 
-Infrastructure as code for a **local AI agent environment** using OpenClaw.
+Instructions and scripts to install a **local AI and AI agent environment**.
 
-This repository provides a **reproducible, script-based setup** to deploy an isolated AI agent inside a virtual machine, with controlled access to system resources and GitHub.
+This repository provides a **reproducible, script-based  (to the extent possible) setup** to deploy an isolated AI and AI agent inside a virtual machine, with controlled access to system resources and GitHub.
 
 ---
 # 🎯 Purpose
-To have an AI or AI agent that can collaborate with me on a public or private repository to write software or complete other writing tasks (e.g. a book).  
-It should be able to accept instructions via email or a chat window.  
+To have an AI and AI agent that can collaborate with me on a public or private repository.  
+It should be able to write software or complete other writing tasks (e.g. a book) according to the provided instructions.  
 It should have the capability to build a software from the specifications alone. Or write a book using the instructions on the content and the description of the audience.
+It should be able to accept instructions via email or a chat window.  
 
 **A secure, self-hosted AI collaborator** that works alongside you on code and writing projects.
 Send instructions via **email or chat**, and your AI agent will:
-- 💻 Build software from specifications alone
+- 💻 Build software from specifications alone and update the specifications to reflect the code updates
 - 📚 Write books based on content guidelines and audience description
 - 🔄 Collaborate on public and private repositories
 - 📝 Accept multi-channel instructions (email, REST API, web UI)
@@ -22,7 +23,7 @@ Send instructions via **email or chat**, and your AI agent will:
 
 # 🎯 Goal
 
-Create a **secure, portable, reproducible environment** where an AI agent (OpenClaw) can:
+Create a **secure, portable, reproducible environment** where an AI agent (e.g. OpenClaw) can:
 
 * execute commands
 * write and modify code
@@ -84,7 +85,6 @@ chmod +x setup_openclaw.sh
 sudo ./setup_openclaw.sh
 ```
 
----
 
 ## 3. What the Script Does (Bootstrap)
 
