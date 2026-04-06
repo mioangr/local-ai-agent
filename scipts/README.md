@@ -1,0 +1,50 @@
+# Utility Scripts
+
+Helper scripts for interacting with the AI agent system.
+
+## Scripts Overview
+
+| Script | Purpose | Example |
+|--------|---------|---------|
+| `send_task.py` | Send a task to the agent | `./send_task.py --project my-app --instruction "Add logging"` |
+| `list_repos.py` | List configured repositories | `./list_repos.py` |
+| `add_repo.py` | Add a new repository | `./add_repo.py --name my-app --url https://github.com/user/repo` |
+
+## Usage
+
+All scripts connect to Redis to communicate with the agent. Make sure Redis is running:
+```bash
+cd /home/aiuser/docker && docker compose ps redis
+```
+
+### Sending a Task
+```bash
+./send_task.py --project my-web-app --instruction "Add error handling to the login function"
+```
+
+The script will:
+- Load repository configuration
+- Validate the project exists
+- Push the task to Redis queue
+- Wait for result (or return immediately with task ID)
+
+### Listing Repositories
+```bash
+./list_repos.py --verbose
+```
+
+### Adding a Repository
+```bash
+./add_repo.py --name new-project --url https://github.com/username/repo --branch main
+```
+
+### Environment
+These scripts expect:
+- Redis running on localhost:6379 (default)
+- Configuration at /home/aiuser/config-repos/repos.json
+- You can override with environment variables:
+
+```bash
+export REDIS_URL=redis://localhost:6379
+export CONFIG_PATH=/custom/path/repos.json
+```

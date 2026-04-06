@@ -1,0 +1,128 @@
+
+#### `docker/docker-compose.yml`
+
+```yaml
+version: '3.8'
+
+# =============================================================================
+# Docker Compose Configuration for AI Agent System
+# =============================================================================
+# Purpose: Orchestrates three services:
+#   1. ollama    - Local LLM server (DeepSeek)
+#   2. redis     - Task queue and state storage
+#   3. agent     - LangGraph AI agent that processes tasks
+# =============================================================================
+
+networks:
+  ai-network:
+    driver: bridge
+    # Internal network for container communication only
+    # No external access except what's explicitly allowed
+
+volumes:
+  ollama-data:   # Persists downloaded models (can be 4-20GB)
+  redis-data:    # Persists task queues and conversation memory
+
+services:
+  # --------------------------------------------------------------------------
+  # Service 1: Ollama LLM Server
+  # --------------------------------------------------------------------------
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    restart: unless-stopped
+    networks:
+      - ai-network
+    volumes:
+      - ollama-data:/root/.ollama   # Store models here
+    environment:
+      - OLLAMA_HOST=0.0.0.0         # Listen on all interfaces (container only)
+      - OLLAMA_KEEP_ALIVE=24h       # Keep model loaded in memory
+    ports:
+      - "11434:11434"               # Expose for debugging (optional)
+    deploy:
+      resources:
+        limits:
+          memory: 8G                # Adjust based on VM RAM
+          cpus: '2.0'
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # --------------------------------------------------------------------------
+  # Service 2: Redis (Task Queue & Memory)
+  # --------------------------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    restart: unless-stopped
+    networks:
+      - ai-network
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes --save 60 1
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '0.5'
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # --------------------------------------------------------------------------
+  # Service 3: LangGraph AI Agent
+  # --------------------------------------------------------------------------
+  langgraph-agent:
+    build:
+      context: .
+      dockerfile: Dockerfile.agent
+    container_name: langgraph-agent
+    restart: unless-stopped
+    networks:
+      - ai-network
+    depends_on:
+      ollama:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      # LLM Configuration
+      - OLLAMA_URL=http://ollama:11434
+      - MODEL_NAME=deepseek-coder:6.7b-instruct-q4_K_M
+      
+      # Redis Configuration
+      - REDIS_URL=redis://redis:6379
+      
+      # GitHub Configuration (from .env file - mounted as volume)
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - GITHUB_USERNAME=${GITHUB_USERNAME}
+      
+      # Workspace Configuration
+      - WORKSPACE=/workspace
+      - CONFIG_REPO_PATH=/config-repos
+      
+      # Logging
+      - LOG_LEVEL=INFO
+    volumes:
+      - ./workspace:/workspace           # Ephemeral repo clones
+      - ../logs:/app/logs                # Agent logs (mounted from host)
+      - ../config-repos:/config-repos:ro # Repository configs (read-only)
+      - ../.env:/app/.env:ro             # Secrets (read-only)
+      - ../agent:/app/agent              # Agent code (for development)
+    working_dir: /app
+    command: python -u agent/langgraph_agent.py
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '1.0'
+    healthcheck:
+      test: ["CMD", "python", "-c", "import redis; r=redis.Redis(host='redis'); r.ping()"]
+      interval: 30s
+      timeout: 10s
+      retries: 3

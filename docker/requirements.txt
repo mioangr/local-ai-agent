@@ -1,0 +1,19 @@
+# Python dependencies for the AI agent
+# Install with: pip install -r requirements.txt
+
+# Core AI orchestration
+langgraph>=0.0.20
+langchain>=0.1.0
+langchain-community>=0.0.10
+
+# Task queue and state management
+redis>=5.0.0
+
+# GitHub API integration
+PyGithub>=2.1.0
+
+# HTTP requests (for future webhooks)
+requests>=2.31.0
+
+# JSON and YAML parsing (for configs)
+pyyaml>=6.0

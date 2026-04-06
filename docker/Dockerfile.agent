@@ -1,0 +1,45 @@
+# =============================================================================
+# Dockerfile for LangGraph AI Agent
+# =============================================================================
+# Purpose: Creates a container with Python 3.11, LangGraph, GitHub CLI, and git
+# Usage: Built automatically by docker-compose.yml
+# =============================================================================
+
+FROM python:3.11-slim
+
+# Install system dependencies
+# - git: for cloning repositories
+# - gh (GitHub CLI): for PR creation and repository operations
+# - curl: for health checks and API calls
+RUN apt-get update && apt-get install -y \
+    git \
+    curl \
+    gnupg \
+    && curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
+    && chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg \
+    && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
+    && apt-get update \
+    && apt-get install -y gh \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set working directory
+WORKDIR /app
+
+# Copy requirements and install Python dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy agent code (mounted as volume in development, but copied for production)
+COPY agent/ ./agent/
+COPY config-repos/ ./config-repos/
+
+# Create necessary directories
+RUN mkdir -p /workspace /app/logs && chmod 755 /workspace
+
+# Configure git to use GitHub token (set at runtime via environment)
+RUN git config --global user.email "ai-agent@local.local" && \
+    git config --global user.name "AI Agent"
+
+# Set default command
+CMD ["python", "-u", "agent/langgraph_agent.py"]
