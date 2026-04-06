@@ -271,7 +271,7 @@ The gateway writes a task to Redis queue; the agent polls or listens, executes, 
 * VMware Workstation or VMware Fusion
 * Ubuntu Server installed inside VM
 * Internet access inside VM
-* Linux security hardening and extra packages were installed with the script [linux-initial-config.sh](linux-initial-config.sh)
+* Linux security hardening and extra packages were installed with the script [linux-initial-config.sh](0-Prerequisites/linux-golden-image/linux-initial-config.sh)
 * A "Golden image" is created for this state of linux so it can be reused in the next steps (installation of Docker and AI components)
 
 ---
@@ -282,20 +282,12 @@ The gateway writes a task to Redis queue; the agent polls or listens, executes, 
 
 Make sure to run this step from your **main Linux user account** (the script will automatically create the dedicated `aiuser` account for the AI running context).
 
-**Method A: Automated URL Installation**
-Download and execute directly into a new temporary `temp-web-install/` subfolder:
+**Automated URL Installation**
 ```bash
 curl -s https://raw.githubusercontent.com/mioangr/local-ai-agent/main/setup/install-from-web.sh | bash
 ```
+Will download the source files into a new temporary `temp-web-install/` subfolder and run them from there.
 
-**Method B: Manual Installation**
-Clone into a temporary `temp-web-install/` folder and execute:
-```bash
-git clone https://github.com/mioangr/local-ai-agent.git temp-web-install
-cd temp-web-install
-chmod +x setup/setup.sh
-sudo ./setup/setup.sh
-```
 
 
 ## 3. What the Script Does (Bootstrap)
@@ -380,35 +372,8 @@ Planned approach:
 
 ---
 
-# 🧪 Reset / Reproducibility
 
-To reset environment:
-
-```bash
-sudo ./reset_openclaw.sh
-```
-
-This script:
-
-* removes Docker containers/images
-* deletes `aiuser`
-* deletes OpenClaw files
-* optionally removes Docker
-
----
-
-# 📦 Design Principles
-
-* reproducibility (script-based setup)
-* minimal assumptions
-* explicit configuration
-* safe defaults
-* easy teardown/reset
-* portable across machines
-
----
-
-# 🚧 Current Status (IMPORTANT CONTEXT)
+# 🚧 Current Status
 
 This project is **in active development**.
 
@@ -421,12 +386,6 @@ This project is **in active development**.
 * reset script
 * `.env` secrets handling
 
-## What is NOT yet implemented
-
-* actual OpenClaw container integration
-* GitHub authentication automation
-* command safety controls
-* execution sandboxing policies
 
 ---
 
@@ -436,7 +395,6 @@ Planned improvements:
 
 ### 🔐 Security
 
-* restrict OpenClaw command execution
 * add approval layer before execution
 * limit filesystem access further
 
@@ -452,45 +410,6 @@ Planned improvements:
 * resource limits (CPU/memory)
 * network restrictions
 
-### 🧠 OpenClaw Integration
-
-* install and configure OpenClaw inside container
-* connect to LLM (local or API)
-* logging and monitoring
-
-### 🔁 Dev Workflow
-
-* ephemeral repo clones
-* auto-cleanup after runs
-* audit logs of agent actions
-
-
-
----
-
-
-# 🧠 Context for Future Development (AI Memory)
-
-This section summarizes the intent so development can continue without re-explaining everything:
-
-* Target user is a developer building an AI-assisted coding workflow
-* System must be:
-
-  * secure enough for experimentation
-  * easy to reset
-  * portable between machines
-* OpenClaw is expected to:
-
-  * interact with GitHub
-  * generate and modify code
-  * run commands (with safeguards)
-* Current phase:
-
-  * infrastructure setup (not agent logic yet)
-* Next phase:
-
-  * controlled agent capabilities + GitHub workflow
-
 ---
 
 # ⚠️ Disclaimer
@@ -501,12 +420,6 @@ This project allows execution of automated commands.
 * Do not expose sensitive data
 * Always review agent-generated code
 
----
-
-# 📌 Notes
-
-* This repository intentionally avoids complex DevOps tools (e.g. Ansible) for simplicity
-* Designed for gradual evolution toward a more advanced system
 
 ---
 
