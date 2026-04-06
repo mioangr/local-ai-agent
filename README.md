@@ -212,6 +212,9 @@ local-ai-agent/
 -  Makes changes
 - Creates PR
 
+## Deployment
+To deploy, copy the entire github repo / folder to your VM and run ./setup.sh.
+
 ## Component Placement & Responsibilities
 
 | Component          | Location               | Purpose                                                            |
