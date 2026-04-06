@@ -130,6 +130,44 @@ Each component directly supports one or more goals:
 └─────────────────────────────────────────────────────────────────┘
 ```
 
+## Folder structure
+
+```
+local-ai-agent/
+├── README.md                          # Main project documentation (updated)
+├── setup.sh                           # Umbrella setup script (run once)
+├── ai-agent-setup/                    # All setup scripts
+│   ├── README.md                      # Overview of setup scripts
+│   ├── 01-system-deps.sh              # Install system dependencies
+│   ├── 02-docker.sh                   # Install Docker
+│   ├── 03-python-deps.sh              # Install Python & packages
+│   ├── 04-create-user.sh              # Create aiuser
+│   ├── 05-secrets.sh                  # Configure secrets
+│   ├── 06-directories.sh              # Create directory structure
+│   ├── 07-docker-compose.sh           # Setup Docker Compose
+│   ├── 08-pull-model.sh               # Pull DeepSeek model
+│   └── common.sh                      # Common functions (error handling)
+├── config-repos/                      # Repository configurations
+│   ├── README.md                      # Documentation for repo configs
+│   └── repos.json                     # List of managed repositories
+├── docker/                            # Docker-related files
+│   ├── README.md                      # Docker setup documentation
+│   ├── docker-compose.yml             # Main compose file
+│   ├── Dockerfile.agent               # Agent container build
+│   └── requirements.txt               # Python dependencies
+├── agent/                             # Agent code
+│   ├── README.md                      # Agent documentation
+│   ├── langgraph_agent.py             # Main agent script
+│   └── repo_manager.py                # Repository management utilities
+├── scripts/                           # Helper scripts
+│   ├── README.md                      # Scripts documentation
+│   ├── send_task.py                   # Send task to agent
+│   ├── list_repos.py                  # List configured repositories
+│   └── add_repo.py                    # Add new repository
+└── logs/                              # Log files (created at runtime)
+```
+
+
 ## Component Placement & Responsibilities
 
 | Component          | Location               | Purpose                                                            |
