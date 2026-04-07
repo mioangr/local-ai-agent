@@ -35,7 +35,7 @@ prompt_enter "Press Enter when you have your token ready..."
 
 # Get GitHub token
 echo ""
-prompt_secret "Enter your GitHub token: " GITHUB_TOKEN
+prompt_input "Enter your GitHub token (visible): " GITHUB_TOKEN
 
 # Get GitHub username
 prompt_input "Enter your GitHub username: " GITHUB_USERNAME
