@@ -7,12 +7,21 @@ Helper scripts for interacting with the AI agent system.
 | Script | Purpose | Example |
 |--------|---------|---------|
 | `send_task.py` | Send a task to the agent | `./send_task.py --project my-app --instruction "Add logging"` |
+| `doctor.sh` | Diagnose the current installation and runtime state | `./doctor.sh` |
+| `reset-runtime.sh` | Stop containers and clear transient runtime state | `./reset-runtime.sh --purge-volumes` |
+| `reset-install.sh` | Remove the installed project and optionally the AI user | `./reset-install.sh --remove-user` |
 
 ## Usage
 
-All scripts connect to Redis to communicate with the agent. Make sure Redis is running:
+`send_task.py` connects to Redis to communicate with the agent. Make sure Redis is running before using it:
 ```bash
 cd /home/aiuser/local-ai-agent/docker && docker compose ps redis
+```
+
+The maintenance scripts are intended to be run on the VM host:
+```bash
+cd /home/aiuser/local-ai-agent/scripts
+./doctor.sh
 ```
 
 ### Sending a Task

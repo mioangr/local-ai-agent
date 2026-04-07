@@ -14,8 +14,7 @@ print_header "Configuring Secrets"
 # Check if .env already exists
 if [ -f "$ENV_FILE" ]; then
     print_warning ".env file already exists"
-    read -p "Overwrite? (y/n) " -n 1 -r
-    echo
+    prompt_yes_no "Overwrite? (y/n) " REPLY
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
         echo "Keeping existing .env file"
         exit 0
@@ -32,15 +31,14 @@ echo "  - repo (full control of private repositories)"
 echo "  - workflow (if using GitHub Actions)"
 echo "  - write:discussion (optional, for comments)"
 echo ""
-read -p "Press Enter when you have your token ready..."
+prompt_enter "Press Enter when you have your token ready..."
 
 # Get GitHub token
 echo ""
-read -sp "Enter your GitHub token: " GITHUB_TOKEN
-echo ""
+prompt_secret "Enter your GitHub token: " GITHUB_TOKEN
 
 # Get GitHub username
-read -p "Enter your GitHub username: " GITHUB_USERNAME
+prompt_input "Enter your GitHub username: " GITHUB_USERNAME
 
 # Validate token (basic check)
 if [ -z "$GITHUB_TOKEN" ] || [ -z "$GITHUB_USERNAME" ]; then

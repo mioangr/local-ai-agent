@@ -15,8 +15,7 @@ print_header "Installing Docker"
 if check_command docker; then
     print_warning "Docker is already installed"
     docker --version
-    read -p "Reinstall? (y/n) " -n 1 -r
-    echo
+    prompt_yes_no "Reinstall? (y/n) " REPLY
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
         echo "Skipping Docker installation"
         exit 0

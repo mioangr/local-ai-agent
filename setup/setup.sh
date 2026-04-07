@@ -40,51 +40,53 @@ echo "  ✓ Python and required packages"
 echo "  ✓ Dedicated AI user for running the agent"
 echo "  ✓ DeepSeek LLM model (~4GB download)"
 echo ""
-read -p "Continue? (y/n) " -n 1 -r
-echo
+prompt_yes_no "Continue? (y/n) " REPLY
 if [[ ! $REPLY =~ ^[Yy]$ ]]; then
     exit 1
 fi
 
+run_subscript() {
+    local step_label="$1"
+    local script_name="$2"
+    local error_message="$3"
+
+    echo ""
+    echo ">>> Starting $script_name ($step_label)"
+    bash "$SETUP_DIR/$script_name"
+    check_error "$error_message"
+}
+
 # Step 1: System dependencies
 print_step "Step 1/8: Installing system dependencies"
-bash "$SETUP_DIR/01-system-deps.sh"
-check_error "System dependencies installation failed"
+run_subscript "Step 1/8" "01-system-deps.sh" "System dependencies installation failed"
 
 # Step 2: Docker
 print_step "Step 2/8: Installing Docker"
-bash "$SETUP_DIR/02-docker.sh"
-check_error "Docker installation failed"
+run_subscript "Step 2/8" "02-docker.sh" "Docker installation failed"
 
 # Step 3: Python dependencies
 print_step "Step 3/8: Installing Python and packages"
-bash "$SETUP_DIR/03-python-deps.sh"
-check_error "Python setup failed"
+run_subscript "Step 3/8" "03-python-deps.sh" "Python setup failed"
 
 # Step 4: Create AI user
 print_step "Step 4/8: Creating dedicated AI user"
-bash "$SETUP_DIR/04-create-user.sh"
-check_error "User creation failed"
+run_subscript "Step 4/8" "04-create-user.sh" "User creation failed"
 
 # Step 5: Configure secrets
 print_step "Step 5/8: Configuring secrets"
-bash "$SETUP_DIR/05-secrets.sh"
-check_error "Secrets configuration failed"
+run_subscript "Step 5/8" "05-secrets.sh" "Secrets configuration failed"
 
 # Step 6: Create directory structure
 print_step "Step 6/8: Creating directory structure"
-bash "$SETUP_DIR/06-directories.sh"
-check_error "Directory creation failed"
+run_subscript "Step 6/8" "06-directories.sh" "Directory creation failed"
 
 # Step 7: Setup Docker Compose
 print_step "Step 7/8: Setting up Docker containers"
-bash "$SETUP_DIR/07-docker-compose.sh"
-check_error "Docker Compose setup failed"
+run_subscript "Step 7/8" "07-docker-compose.sh" "Docker Compose setup failed"
 
 # Step 8: Pull LLM model
 print_step "Step 8/8: Downloading DeepSeek model (this may take several minutes)"
-bash "$SETUP_DIR/08-pull-model.sh"
-check_error "Model download failed"
+run_subscript "Step 8/8" "08-pull-model.sh" "Model download failed"
 
 print_header "Setup Complete! 🎉"
 echo ""

@@ -26,6 +26,9 @@ cd temp-web-install
 echo "Making setup script executable..."
 chmod +x setup/setup.sh
 
+echo "Requesting sudo access for system setup..."
+sudo -v
+
 echo "Running main setup script..."
 # Run the setup script with sudo
 sudo ./setup/setup.sh

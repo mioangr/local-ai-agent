@@ -213,6 +213,13 @@ local-ai-agent/
 
 ## Deployment
 
+| Script | Purpose | Usage |
+|--------|---------|-------|
+| `install-from-web.sh` | Bootstrap a fresh VM installation from GitHub | `curl -s https://raw.githubusercontent.com/mioangr/local-ai-agent/main/setup/install-from-web.sh \| bash` |
+| `doctor.sh` | Inspect the installation and report what is missing or unhealthy | `cd /home/aiuser/local-ai-agent/scripts && ./doctor.sh` |
+| `reset-runtime.sh` | Stop containers and clear transient runtime state so you can retry the Docker/runtime steps | `cd /home/aiuser/local-ai-agent/scripts && ./reset-runtime.sh` |
+| `reset-install.sh` | Remove the installed project files, and optionally the dedicated user, before reinstalling | `cd /home/aiuser/local-ai-agent/scripts && ./reset-install.sh --remove-user` |
+
 Run the deployment from your **main Linux user account**. The setup scripts handle the process of automatically creating a specific, dedicated `aiuser` account that will be used by the AI components.
 
 
@@ -294,7 +301,7 @@ Will download the source files into a new temporary `temp-web-install/` subfolde
 
 > **Bootstrap** = Initial automated setup of a fresh system.
 
-The script is **idempotent** (safe to re-run) and performs:
+Most setup steps are safe to rerun, and the recovery scripts above can help if a previous install stopped halfway. The bootstrap performs:
 
 * system update
 * installs required packages

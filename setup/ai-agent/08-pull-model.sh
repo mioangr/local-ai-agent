@@ -26,8 +26,7 @@ MODEL_EXISTS=$(sudo docker exec ollama ollama list | grep -c "$MODEL_NAME" || ec
 
 if [ "$MODEL_EXISTS" -gt 0 ]; then
     print_warning "Model $MODEL_NAME already exists"
-    read -p "Redownload? (y/n) " -n 1 -r
-    echo
+    prompt_yes_no "Redownload? (y/n) " REPLY
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
         echo "Keeping existing model"
         exit 0

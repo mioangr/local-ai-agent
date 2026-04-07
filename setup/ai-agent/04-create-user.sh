@@ -14,8 +14,7 @@ print_header "Creating AI User"
 # Check if user already exists
 if id "$AI_USER" &>/dev/null; then
     print_warning "User $AI_USER already exists"
-    read -p "Recreate user? (y/n) " -n 1 -r
-    echo
+    prompt_yes_no "Recreate user? (y/n) " REPLY
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
         echo "Skipping user creation"
         exit 0

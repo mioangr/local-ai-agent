@@ -119,3 +119,79 @@ run_safe() {
     eval "$cmd"
     check_error "$error_msg"
 }
+
+ensure_interactive_input() {
+    if [ -t 0 ]; then
+        return 0
+    fi
+
+    if [ -r /dev/tty ]; then
+        return 0
+    fi
+
+    die 1 \
+        "Interactive input required, but no terminal is attached" \
+        "Run the installer from an interactive shell or use SSH with a TTY."
+}
+
+prompt_yes_no() {
+    local prompt="$1"
+    local result_var="$2"
+    local answer
+
+    ensure_interactive_input
+
+    if [ -t 0 ]; then
+        read -p "$prompt" -n 1 -r answer
+    else
+        read -p "$prompt" -n 1 -r answer < /dev/tty
+    fi
+    echo
+
+    printf -v "$result_var" '%s' "$answer"
+}
+
+prompt_input() {
+    local prompt="$1"
+    local result_var="$2"
+    local answer
+
+    ensure_interactive_input
+
+    if [ -t 0 ]; then
+        read -p "$prompt" -r answer
+    else
+        read -p "$prompt" -r answer < /dev/tty
+    fi
+
+    printf -v "$result_var" '%s' "$answer"
+}
+
+prompt_secret() {
+    local prompt="$1"
+    local result_var="$2"
+    local answer
+
+    ensure_interactive_input
+
+    if [ -t 0 ]; then
+        read -sp "$prompt" -r answer
+    else
+        read -sp "$prompt" -r answer < /dev/tty
+    fi
+    echo
+
+    printf -v "$result_var" '%s' "$answer"
+}
+
+prompt_enter() {
+    local prompt="$1"
+
+    ensure_interactive_input
+
+    if [ -t 0 ]; then
+        read -p "$prompt" -r
+    else
+        read -p "$prompt" -r < /dev/tty
+    fi
+}

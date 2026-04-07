@@ -51,6 +51,7 @@ fi
 if [ -d "$PROJECT_ROOT/scripts" ]; then
     sudo cp -r "$PROJECT_ROOT/scripts/"* "$SCRIPTS_DIR/"
     sudo chmod +x "$SCRIPTS_DIR/"*.py 2>/dev/null || true
+    sudo chmod +x "$SCRIPTS_DIR/"*.sh 2>/dev/null || true
     sudo chown -R "$AI_USER:$AI_USER" "$SCRIPTS_DIR"
     echo "  ✓ Copied utility scripts"
 fi
