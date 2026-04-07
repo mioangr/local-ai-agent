@@ -38,7 +38,7 @@ echo "  ✓ System dependencies (git, curl, etc.)"
 echo "  ✓ Docker and Docker Compose"
 echo "  ✓ Python and required packages"
 echo "  ✓ Dedicated AI user for running the agent"
-echo "  ✓ DeepSeek LLM model (~4GB download)"
+echo "  ✓ Configured Ollama model download"
 echo ""
 prompt_yes_no "Continue? (y/n) " REPLY
 if [[ ! $REPLY =~ ^[Yy]$ ]]; then
@@ -85,7 +85,7 @@ print_step "Step 7/8: Setting up Docker containers"
 run_subscript "Step 7/8" "07-docker-compose.sh" "Docker Compose setup failed"
 
 # Step 8: Pull LLM model
-print_step "Step 8/8: Downloading DeepSeek model (this may take several minutes)"
+print_step "Step 8/8: Downloading configured Ollama model (this may take several minutes)"
 run_subscript "Step 8/8" "08-pull-model.sh" "Model download failed"
 
 print_header "Setup Complete! 🎉"

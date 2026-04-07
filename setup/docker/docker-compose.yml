@@ -1,5 +1,3 @@
-version: '3.8'
-
 # =============================================================================
 # Docker Compose Configuration for AI Agent System
 # =============================================================================
@@ -75,9 +73,11 @@ services:
   # Service 3: LangGraph AI Agent
   # --------------------------------------------------------------------------
   langgraph-agent:
+    env_file:
+      - ../.env
     build:
-      context: .
-      dockerfile: Dockerfile.agent
+      context: ..
+      dockerfile: docker/Dockerfile.agent
     container_name: langgraph-agent
     restart: unless-stopped
     networks:
@@ -88,25 +88,11 @@ services:
       redis:
         condition: service_healthy
     environment:
-      # LLM Configuration
-      - OLLAMA_URL=http://ollama:11434
-      - MODEL_NAME=${MODEL_NAME}
-
-      # Redis Configuration
-      - REDIS_URL=redis://redis:6379
-
-      # GitHub Configuration (from .env file - mounted as volume)
-      - GITHUB_TOKEN=${GITHUB_TOKEN}
-      - GITHUB_USERNAME=${GITHUB_USERNAME}
-
       # Workspace Configuration
       - WORKSPACE=/workspace
       - CONFIG_REPO_PATH=/settings/repos
-
-      # Logging
-      - LOG_LEVEL=${LOG_LEVEL}
     volumes:
-      - ./workspace:/workspace # Ephemeral repo clones
+      - ../workspace:/workspace # Ephemeral repo clones
       - ../logs:/app/logs # Agent logs (mounted from host)
       - ../settings/repos:/settings/repos:ro # Repository configs (read-only)
       - ../.env:/app/.env:ro # Secrets (read-only)

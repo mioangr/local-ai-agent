@@ -11,6 +11,15 @@ source "$(dirname "$0")/common.sh"
 
 print_header "Setting Up Docker Containers"
 
+run_compose_as_aiuser() {
+    local compose_cmd="$1"
+
+    sudo -iu "$AI_USER" bash -lc "
+        cd '$DOCKER_DIR'
+        docker compose $compose_cmd
+    "
+}
+
 # Check if compose file exists
 if [ ! -f "$COMPOSE_FILE" ]; then
     die 1 "docker-compose.yml not found at $COMPOSE_FILE" \
@@ -19,29 +28,11 @@ fi
 
 # Switch to ai user context for Docker operations
 print_step "Building Docker images (this may take a few minutes)..."
-
-# Run docker commands as aiuser
-sudo -u $AI_USER bash << EOF
-    cd $DOCKER_DIR
-    docker compose build
-    if [ \$? -ne 0 ]; then
-        echo "Docker build failed"
-        exit 1
-    fi
-EOF
-
+run_compose_as_aiuser "build"
 check_error "Docker build failed"
 
 print_step "Starting containers..."
-sudo -u $AI_USER bash << EOF
-    cd $DOCKER_DIR
-    docker compose up -d
-    if [ \$? -ne 0 ]; then
-        echo "Docker compose up failed"
-        exit 1
-    fi
-EOF
-
+run_compose_as_aiuser "up -d"
 check_error "Failed to start containers"
 
 # Wait for containers to be ready
@@ -52,6 +43,7 @@ sleep 5
 print_step "Verifying container status..."
 
 CONTAINERS=("ollama" "langgraph-agent" "redis")
+FAILED_CONTAINERS=()
 for container in "${CONTAINERS[@]}"; do
     if sudo docker ps --format 'table {{.Names}}' | grep -q "^$container$"; then
         STATUS=$(sudo docker ps --filter "name=$container" --format "{{.Status}}")
@@ -59,8 +51,18 @@ for container in "${CONTAINERS[@]}"; do
     else
         print_warning "$container container is not running"
         echo "  Check logs: sudo docker logs $container"
+        FAILED_CONTAINERS+=("$container")
     fi
 done
+
+if [ ${#FAILED_CONTAINERS[@]} -gt 0 ]; then
+    echo ""
+    echo "Run this to inspect container logs:"
+    echo "  cd $DOCKER_DIR && docker compose logs --no-color ${FAILED_CONTAINERS[*]}"
+    echo ""
+    die 1 "One or more containers failed to start: ${FAILED_CONTAINERS[*]}" \
+           "Review the docker compose output above, then run: cd $DOCKER_DIR && docker compose logs"
+fi
 
 echo ""
 print_step "Docker containers started successfully"

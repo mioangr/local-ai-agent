@@ -16,7 +16,7 @@ Shared installer settings live in the repo-root `install.conf` file.
 | `05-secrets.sh` | Prompts for and stores GitHub token | After user creation |
 | `06-directories.sh` | Creates project folder structure | After secrets |
 | `07-docker-compose.sh` | Builds and starts Docker containers | After directories |
-| `08-pull-model.sh` | Downloads DeepSeek model via Ollama | Last step |
+| `08-pull-model.sh` | Downloads the configured Ollama model via Ollama | Last step |
 
 ## Error Handling
 

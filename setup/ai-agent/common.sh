@@ -17,7 +17,7 @@ source "$INSTALL_CONFIG_FILE"
 
 AI_USER="${AI_USER:-aiuser}"
 INSTALL_DEST_DIR="${INSTALL_DEST_DIR:-local-ai-agent}"
-MODEL_NAME="${MODEL_NAME:-deepseek-coder:6.7b-instruct-q4_K_M}"
+MODEL_NAME="${MODEL_NAME:-qwen2.5-coder:1.5b}"
 LOG_LEVEL="${LOG_LEVEL:-INFO}"
 
 AI_HOME="/home/$AI_USER"
@@ -105,8 +105,9 @@ check_command() {
 }
 
 check_error() {
+    local status=$?
     local message="$1"
-    if [ $? -ne 0 ]; then
+    if [ $status -ne 0 ]; then
         die 1 "$message" "Review the error above and try again. If the problem persists, check the documentation."
     fi
 }

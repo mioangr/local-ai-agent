@@ -37,7 +37,7 @@ from langgraph.graph import StateGraph, END
 # =============================================================================
 REDIS_URL = os.getenv("REDIS_URL", "redis://redis:6379")
 OLLAMA_URL = os.getenv("OLLAMA_URL", "http://ollama:11434")
-MODEL_NAME = os.getenv("MODEL_NAME", "deepseek-coder:6.7b-instruct-q4_K_M")
+MODEL_NAME = os.getenv("MODEL_NAME", "qwen2.5-coder:1.5b")
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 GITHUB_USERNAME = os.getenv("GITHUB_USERNAME")
 WORKSPACE = os.getenv("WORKSPACE", "/workspace")

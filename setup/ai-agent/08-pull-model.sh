@@ -1,17 +1,17 @@
 #!/bin/bash
 # =============================================================================
-# Script 08: Pull DeepSeek Model
+# Script 08: Pull Ollama Model
 # =============================================================================
-# Purpose: Downloads DeepSeek model into Ollama container
+# Purpose: Downloads the configured Ollama model into the Ollama container
 # Dependencies: Ollama container running
-# Output: DeepSeek model (~4GB) stored in Docker volume
+# Output: Configured Ollama model stored in Docker volume
 # =============================================================================
 
 source "$(dirname "$0")/common.sh"
 
-print_header "Downloading DeepSeek Model"
+print_header "Downloading Ollama Model"
 
-MODEL_SIZE="~4GB"
+MODEL_SIZE="size varies by model"
 
 # Check if Ollama container is running
 if ! sudo docker ps | grep -q ollama; then
@@ -72,7 +72,7 @@ else
 fi
 
 echo ""
-print_step "DeepSeek model ready for use"
+print_step "Ollama model ready for use"
 echo ""
 echo "Model details:"
 echo "  Name: $MODEL_NAME"

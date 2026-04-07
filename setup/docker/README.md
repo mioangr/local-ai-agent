@@ -16,7 +16,7 @@ This folder contains all Docker-related files for containerizing the AI agent.
 - **Image**: `ollama/ollama:latest`
 - **Port**: 11434 (internal)
 - **Volume**: `ollama-data` (persists downloaded models)
-- **Model**: deepseek-coder:6.7b-instruct-q4_K_M (~4GB)
+- **Model**: Controlled by `MODEL_NAME` in `install.conf` (default: `qwen2.5-coder:1.5b`)
 
 ### 2. LangGraph Agent
 - **Build**: Custom from `Dockerfile.agent`
@@ -74,7 +74,7 @@ docker compose logs <container-name>
 ### Ollama can't find model
 ```bash
 docker exec ollama ollama list
-docker exec ollama ollama pull deepseek-coder:6.7b-instruct-q4_K_M
+docker exec ollama ollama pull qwen2.5-coder:1.5b
 ```
 
 ### Permission denied on workspace

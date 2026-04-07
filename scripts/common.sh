@@ -9,7 +9,7 @@ INSTALL_CONFIG_FILE="${INSTALL_CONFIG_FILE:-$ROOT_DIR/install.conf}"
 
 AI_USER="aiuser"
 INSTALL_DEST_DIR="local-ai-agent"
-MODEL_NAME="deepseek-coder:6.7b-instruct-q4_K_M"
+MODEL_NAME="qwen2.5-coder:1.5b"
 LOG_LEVEL="INFO"
 
 if [ -f "$INSTALL_CONFIG_FILE" ]; then

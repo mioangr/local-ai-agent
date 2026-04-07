@@ -160,7 +160,7 @@ local-ai-agent/
 │   ├── 05-secrets.sh                  # Configure secrets
 │   ├── 06-directories.sh              # Create directory structure
 │   ├── 07-docker-compose.sh           # Setup Docker Compose
-│   ├── 08-pull-model.sh               # Pull DeepSeek model
+│   ├── 08-pull-model.sh               # Pull configured Ollama model
 │   └── common.sh                      # Common functions (error handling)
 ├── setup/docker/                      # Docker-related files
 │   ├── README.md                      # Docker setup documentation

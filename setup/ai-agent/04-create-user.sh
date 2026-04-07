@@ -31,9 +31,16 @@ print_step "Creating user $AI_USER..."
 sudo useradd -m -s /bin/bash -U $AI_USER
 check_error "Failed to create user $AI_USER"
 
-# Set password (optional - user can set later)
-echo "Setting password for $AI_USER (you can leave it empty for no password)"
-sudo passwd $AI_USER
+# Set password (optional)
+prompt_yes_no "Set a login password for $AI_USER now? (y/n) " REPLY
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+    print_step "Setting password for $AI_USER..."
+    sudo passwd $AI_USER
+    check_error "Failed to set password for $AI_USER"
+else
+    print_warning "Skipping password setup for $AI_USER"
+    echo "  You can set it later with: sudo passwd $AI_USER"
+fi
 
 # Add user to docker group
 print_step "Adding $AI_USER to docker group..."
