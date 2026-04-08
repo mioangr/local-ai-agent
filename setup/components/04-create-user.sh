@@ -7,7 +7,7 @@
 # Output: User 'aiuser' created, added to docker group
 # =============================================================================
 
-source "$(dirname "$0")/common.sh"
+source "$(dirname "$0")/../common.sh"
 
 print_header "Creating AI User"
 

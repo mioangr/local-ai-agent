@@ -13,10 +13,10 @@ set -e  # Exit on any error
 
 # Get the directory where this script is located
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SETUP_DIR="$SCRIPT_DIR/ai-agent"
+SETUP_DIR="$SCRIPT_DIR/components"
 
 # Source common functions
-source "$SETUP_DIR/common.sh"
+source "$SCRIPT_DIR/common.sh"
 
 # Colors for output
 RED='\033[0;31m'

@@ -7,7 +7,7 @@
 # Output: Running containers: ollama, langgraph-agent, redis
 # =============================================================================
 
-source "$(dirname "$0")/common.sh"
+source "$(dirname "$0")/../common.sh"
 
 print_header "Setting Up Docker Containers"
 

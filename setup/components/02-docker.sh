@@ -7,7 +7,7 @@
 # Output: Docker daemon running, docker compose command available
 # =============================================================================
 
-source "$(dirname "$0")/common.sh"
+source "$(dirname "$0")/../common.sh"
 
 print_header "Installing Docker"
 

@@ -1,14 +1,14 @@
-# AI Agent Setup Scripts
+# Setup Components
 
 This folder contains all scripts required for the one-time installation of the AI agent environment.
 
 Shared installer settings live in the repo-root `install.conf` file.
+Shared installer helpers live in `setup/common.sh`.
 
 ## Scripts Overview
 
 | Script | Purpose | When to run |
 |--------|---------|-------------|
-| `common.sh` | Shared functions and error handling | Sourced by other scripts |
 | `01-system-deps.sh` | Installs git, curl, build tools | Once, before anything else |
 | `02-docker.sh` | Installs Docker Engine and Compose | After system deps |
 | `03-python-deps.sh` | Installs Python and pip packages | After Docker |
@@ -20,7 +20,7 @@ Shared installer settings live in the repo-root `install.conf` file.
 
 ## Error Handling
 
-Each script uses the `die()` function from `common.sh` to display friendly error messages and exit on failure. If a script fails, it will show:
+Each script uses the `die()` function from `setup/common.sh` to display friendly error messages and exit on failure. If a script fails, it will show:
 - What went wrong
 - Possible causes
 - How to fix it
@@ -29,7 +29,7 @@ Each script uses the `die()` function from `common.sh` to display friendly error
 
 Most scripts are idempotent (safe to rerun). If you need to restart from a specific step:
 ```bash
-  bash setup/ai-agent/03-python-deps.sh  # Run only Python setup
+  bash setup/components/03-python-deps.sh  # Run only Python setup
 ```
 
 ## Manual Intervention

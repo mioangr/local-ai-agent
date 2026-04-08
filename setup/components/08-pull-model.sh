@@ -7,7 +7,7 @@
 # Output: Configured Ollama model stored in Docker volume
 # =============================================================================
 
-source "$(dirname "$0")/common.sh"
+source "$(dirname "$0")/../common.sh"
 
 print_header "Downloading Ollama Model"
 

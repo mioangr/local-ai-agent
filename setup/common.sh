@@ -4,7 +4,7 @@
 # =============================================================================
 
 COMMON_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(cd "$COMMON_DIR/../.." && pwd)"
+PROJECT_ROOT="$(cd "$COMMON_DIR/.." && pwd)"
 INSTALL_CONFIG_FILE="${INSTALL_CONFIG_FILE:-$PROJECT_ROOT/install.conf}"
 
 if [ ! -f "$INSTALL_CONFIG_FILE" ]; then

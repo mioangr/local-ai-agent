@@ -7,7 +7,7 @@
 # Output: $INSTALL_ROOT/.env with GitHub and runtime settings
 # =============================================================================
 
-source "$(dirname "$0")/common.sh"
+source "$(dirname "$0")/../common.sh"
 
 print_header "Configuring Secrets"
 

@@ -7,7 +7,7 @@
 # Output: Installed packages (git, curl, build-essential, etc.)
 # =============================================================================
 
-source "$(dirname "$0")/common.sh"
+source "$(dirname "$0")/../common.sh"
 
 print_header "Installing System Dependencies"
 

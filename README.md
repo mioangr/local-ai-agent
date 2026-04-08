@@ -102,8 +102,9 @@ local-ai-agent/                        # Subfolder where everything is installed
 ├── README.md                          # Main project documentation (updated)
 ├── install.conf                       # Shared install configuration
 ├── setup.sh                           # Umbrella setup script (run once)
-├── setup/ai-agent/                    # All setup scripts
-│   ├── README.md                      # Overview of setup scripts
+├── setup/common.sh                    # Shared setup helpers
+├── setup/components/                  # Setup components
+│   ├── README.md                      # Overview of setup components
 │   ├── 01-system-deps.sh              # Install system dependencies
 │   ├── 02-docker.sh                   # Install Docker
 │   ├── 03-python-deps.sh              # Install Python & packages
@@ -112,7 +113,6 @@ local-ai-agent/                        # Subfolder where everything is installed
 │   ├── 06-directories.sh              # Create directory structure
 │   ├── 07-docker-compose.sh           # Setup Docker Compose
 │   ├── 08-pull-model.sh               # Pull configured Ollama model
-│   └── common.sh                      # Common functions (error handling)
 ├── setup/docker/                      # Docker-related files
 │   ├── README.md                      # Docker setup documentation
 │   ├── docker-compose.yml             # Main compose file

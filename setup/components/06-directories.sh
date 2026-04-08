@@ -7,7 +7,7 @@
 # Output: Complete folder structure under $INSTALL_ROOT
 # =============================================================================
 
-source "$(dirname "$0")/common.sh"
+source "$(dirname "$0")/../common.sh"
 
 print_header "Creating Directory Structure"
 

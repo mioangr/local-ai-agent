@@ -7,7 +7,7 @@
 # Output: python3, pip3, venv support, and redis client package installed
 # =============================================================================
 
-source "$(dirname "$0")/common.sh"
+source "$(dirname "$0")/../common.sh"
 
 print_header "Installing Python Dependencies"
 
