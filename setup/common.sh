@@ -3,6 +3,8 @@
 # Common Functions for Setup Scripts
 # =============================================================================
 
+set -euo pipefail
+
 COMMON_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$COMMON_DIR/.." && pwd)"
 INSTALL_CONFIG_FILE="${INSTALL_CONFIG_FILE:-$PROJECT_ROOT/install.conf}"
@@ -25,7 +27,8 @@ INSTALL_ROOT="$AI_HOME/$INSTALL_DEST_DIR"
 ENV_FILE="$INSTALL_ROOT/.env"
 DOCKER_DIR="$INSTALL_ROOT/docker"
 AGENT_DIR="$INSTALL_ROOT/agent"
-SCRIPTS_DIR="$INSTALL_ROOT/scripts"
+INSTALL_SETUP_DIR="$INSTALL_ROOT/setup"
+RUM_DIR="$INSTALL_ROOT/rum"
 SETTINGS_DIR="$INSTALL_ROOT/settings"
 REPOS_DIR="$SETTINGS_DIR/repos"
 LOGS_DIR="$INSTALL_ROOT/logs"
@@ -43,7 +46,8 @@ export INSTALL_ROOT
 export ENV_FILE
 export DOCKER_DIR
 export AGENT_DIR
-export SCRIPTS_DIR
+export INSTALL_SETUP_DIR
+export RUM_DIR
 export SETTINGS_DIR
 export REPOS_DIR
 export LOGS_DIR
@@ -75,6 +79,41 @@ print_error() {
 
 print_warning() {
     echo -e "${YELLOW}WARNING: $1${NC}"
+}
+
+require_sudo() {
+    print_step "Requesting sudo access..."
+    sudo -v
+}
+
+confirm_action() {
+    local prompt="$1"
+    local reply
+
+    if [ -t 0 ]; then
+        read -p "$prompt" -n 1 -r reply
+    elif [ -r /dev/tty ]; then
+        read -p "$prompt" -n 1 -r reply < /dev/tty
+    else
+        print_error "Confirmation required, but no terminal is attached"
+        exit 1
+    fi
+    echo
+
+    [[ "$reply" =~ ^[Yy]$ ]]
+}
+
+sudo_available_noninteractive() {
+    if [ "$(id -u)" -eq 0 ]; then
+        return 0
+    fi
+
+    sudo -n true >/dev/null 2>&1
+}
+
+show_usage_header() {
+    echo "Usage: $1"
+    echo ""
 }
 
 die() {

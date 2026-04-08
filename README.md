@@ -101,23 +101,30 @@ To achieve the stated goals, the following components are required:
 local-ai-agent/                        # Subfolder where everything is installed.
 ├── README.md                          # Main project documentation (updated)
 ├── install.conf                       # Shared install configuration
-├── setup.sh                           # Umbrella setup script (run once)
-├── setup/common.sh                    # Shared setup helpers
-├── setup/components/                  # Setup components
-│   ├── README.md                      # Overview of setup components
-│   ├── 01-system-deps.sh              # Install system dependencies
-│   ├── 02-docker.sh                   # Install Docker
-│   ├── 03-python-deps.sh              # Install Python & packages
-│   ├── 04-create-user.sh              # Create aiuser
-│   ├── 05-secrets.sh                  # Configure secrets
-│   ├── 06-directories.sh              # Create directory structure
-│   ├── 07-docker-compose.sh           # Setup Docker Compose
-│   ├── 08-pull-model.sh               # Pull configured Ollama model
-├── setup/docker/                      # Docker-related files
-│   ├── README.md                      # Docker setup documentation
-│   ├── docker-compose.yml             # Main compose file
-│   ├── Dockerfile.agent               # Agent container build
-│   └── requirements.txt               # Python dependencies
+├── setup/                             # Setup, recovery, and installer files
+│   ├── setup.sh                       # Umbrella setup script
+│   ├── common.sh                      # Shared setup helpers
+│   ├── doctor.sh                      # Diagnose the installation and runtime
+│   ├── reset-install.sh               # Remove the installation
+│   ├── reset-runtime.sh               # Reset transient runtime state
+│   ├── components/                    # One-time setup components
+│   │   ├── README.md                  # Overview of setup components
+│   │   ├── 01-system-deps.sh          # Install system dependencies
+│   │   ├── 02-docker.sh               # Install Docker
+│   │   ├── 03-python-deps.sh          # Install Python & packages
+│   │   ├── 04-create-user.sh          # Create aiuser
+│   │   ├── 05-secrets.sh              # Configure secrets
+│   │   ├── 06-directories.sh          # Create directory structure
+│   │   ├── 07-docker-compose.sh       # Setup Docker Compose
+│   │   └── 08-pull-model.sh           # Pull configured Ollama model
+│   └── docker/                        # Docker-related setup files
+│       ├── README.md                  # Docker setup documentation
+│       ├── docker-compose.yml         # Main compose file
+│       ├── Dockerfile.agent           # Agent container build
+│       └── requirements.txt           # Python dependencies
+├── rum/                               # Daily runtime scripts
+│   ├── README.md                      # Runtime script documentation
+│   └── send_task.py                   # Send task to agent
 ├── settings/repos/                    # Repository configurations
 │   ├── README.md                      # Documentation for repo configs
 │   └── repos.json                     # List of managed repositories
@@ -125,9 +132,6 @@ local-ai-agent/                        # Subfolder where everything is installed
 │   ├── README.md                      # Agent documentation
 │   ├── langgraph_agent.py             # Main agent script
 │   └── repo_manager.py                # Repository management utilities
-├── scripts/                           # Helper scripts
-│   ├── README.md                      # Scripts documentation
-│   └── send_task.py                   # Send task to agent
 └── logs/                              # Log files (created at runtime)
 ```
 
@@ -153,7 +157,7 @@ local-ai-agent/                        # Subfolder where everything is installed
 2. Send commands with project name:
 
    ```bash
-   ./scripts/send_task.py --project my-web-app --instruction "Add error handling to login function"
+   ./rum/send_task.py --project my-web-app --instruction "Add error handling to login function"
 
 3. Agent automatically:
 
@@ -226,9 +230,9 @@ docker compose up -d
 |--------|---------|-------|
 | `rm -rf temp-web-install` | remove temp installation folder |  |
 | repos.json | Edit the list of repos | `sudo nano /home/aiuser/local-ai-agent/settings/repos/repos.json`  |
-| `doctor.sh` | Inspect the installation and report what is missing or unhealthy | `cd /home/aiuser/local-ai-agent/scripts && ./doctor.sh` |
-| `reset-runtime.sh` | Stop containers and clear transient runtime state so you can retry the Docker/runtime steps | `cd /home/aiuser/local-ai-agent/scripts && ./reset-runtime.sh` |
-| `reset-install.sh` | Remove the installed project files, and optionally the dedicated user, before reinstalling | `cd /home/aiuser/local-ai-agent/scripts && ./reset-install.sh --remove-user` |
+| `doctor.sh` | Inspect the installation and report what is missing or unhealthy | `cd /home/aiuser/local-ai-agent/setup && ./doctor.sh` |
+| `reset-runtime.sh` | Stop containers and clear transient runtime state so you can retry the Docker/runtime steps | `cd /home/aiuser/local-ai-agent/setup && ./reset-runtime.sh` |
+| `reset-install.sh` | Remove the installed project files, and optionally the dedicated user, before reinstalling | `cd /home/aiuser/local-ai-agent/setup && ./reset-install.sh --remove-user` |
 | reset install  | from the web |  |
 
 

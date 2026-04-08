@@ -101,4 +101,4 @@ if [ "$KEEP_LOGS" -eq 0 ]; then
 fi
 
 print_step "Runtime reset complete"
-echo "Next recommended step: $SCRIPTS_DIR/doctor.sh"
+echo "Next recommended step: $INSTALL_SETUP_DIR/doctor.sh"

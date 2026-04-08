@@ -16,7 +16,8 @@ DIRECTORIES=(
     "$INSTALL_ROOT"
     "$DOCKER_DIR"
     "$AGENT_DIR"
-    "$SCRIPTS_DIR"
+    "$INSTALL_SETUP_DIR"
+    "$RUM_DIR"
     "$REPOS_DIR"
     "$LOGS_DIR"
     "$WORKSPACE_DIR"
@@ -47,13 +48,22 @@ if [ -d "$PROJECT_ROOT/agent" ]; then
     echo "  ✓ Copied agent files"
 fi
 
-# Copy scripts
-if [ -d "$PROJECT_ROOT/scripts" ]; then
-    sudo cp -r "$PROJECT_ROOT/scripts/"* "$SCRIPTS_DIR/"
-    sudo chmod +x "$SCRIPTS_DIR/"*.py 2>/dev/null || true
-    sudo chmod +x "$SCRIPTS_DIR/"*.sh 2>/dev/null || true
-    sudo chown -R "$AI_USER:$AI_USER" "$SCRIPTS_DIR"
-    echo "  ✓ Copied utility scripts"
+# Copy setup files
+if [ -d "$PROJECT_ROOT/setup" ]; then
+    sudo cp -r "$PROJECT_ROOT/setup/"* "$INSTALL_SETUP_DIR/"
+    sudo chmod +x "$INSTALL_SETUP_DIR/"*.sh 2>/dev/null || true
+    sudo chmod +x "$INSTALL_SETUP_DIR/components/"*.sh 2>/dev/null || true
+    sudo chown -R "$AI_USER:$AI_USER" "$INSTALL_SETUP_DIR"
+    echo "  ✓ Copied setup and recovery scripts"
+fi
+
+# Copy runtime scripts
+if [ -d "$PROJECT_ROOT/rum" ]; then
+    sudo cp -r "$PROJECT_ROOT/rum/"* "$RUM_DIR/"
+    sudo chmod +x "$RUM_DIR/"*.py 2>/dev/null || true
+    sudo chmod +x "$RUM_DIR/"*.sh 2>/dev/null || true
+    sudo chown -R "$AI_USER:$AI_USER" "$RUM_DIR"
+    echo "  ✓ Copied runtime scripts"
 fi
 
 # Copy settings/repos template
@@ -76,7 +86,8 @@ echo "Directory layout:"
 echo "  $INSTALL_ROOT/"
 echo "  ├── docker/          - Docker compose and container files"
 echo "  ├── agent/           - AI agent Python code"
-echo "  ├── scripts/         - Utility scripts (send_task, etc.)"
+echo "  ├── setup/           - Setup and recovery scripts"
+echo "  ├── rum/             - Daily runtime scripts (send_task, etc.)"
 echo "  ├── settings/repos/  - Repository configurations"
 echo "  ├── logs/            - Runtime logs"
 echo "  ├── workspace/       - Temporary clones of repositories"

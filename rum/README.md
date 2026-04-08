@@ -1,15 +1,12 @@
-# Utility Scripts
+# Runtime Scripts
 
-Helper scripts for interacting with the AI agent system.
+Daily-use scripts for interacting with the AI agent system after setup is complete.
 
 ## Scripts Overview
 
 | Script | Purpose | Example |
 |--------|---------|---------|
 | `send_task.py` | Send a task to the agent | `./send_task.py --project my-app --instruction "Add logging"` |
-| `doctor.sh` | Diagnose the current installation and runtime state | `./doctor.sh` |
-| `reset-runtime.sh` | Stop containers and clear transient runtime state | `./reset-runtime.sh --purge-volumes` |
-| `reset-install.sh` | Remove the installed project and optionally the AI user | `./reset-install.sh --remove-user` |
 
 ## Usage
 
@@ -18,9 +15,9 @@ Helper scripts for interacting with the AI agent system.
 cd /home/aiuser/local-ai-agent/docker && docker compose ps redis
 ```
 
-The maintenance scripts are intended to be run on the VM host:
+Setup and recovery scripts now live under `setup/` on the VM host:
 ```bash
-cd /home/aiuser/local-ai-agent/scripts
+cd /home/aiuser/local-ai-agent/setup
 ./doctor.sh
 ```
 
