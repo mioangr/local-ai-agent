@@ -75,7 +75,7 @@ else
     print_warning "Compose file not found at $COMPOSE_FILE; trying direct container removal"
 fi
 
-sudo docker rm -f ollama redis langgraph-agent >/dev/null 2>&1 || true
+sudo docker rm -f ollama redis langgraph-agent api-gateway >/dev/null 2>&1 || true
 
 if [ -d "$INSTALL_ROOT" ]; then
     print_step "Removing install root $INSTALL_ROOT"

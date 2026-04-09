@@ -84,7 +84,7 @@ else
 fi
 
 print_step "Removing known project containers if they still exist"
-sudo docker rm -f ollama redis langgraph-agent >/dev/null 2>&1 || true
+sudo docker rm -f ollama redis langgraph-agent api-gateway >/dev/null 2>&1 || true
 
 if [ "$KEEP_WORKSPACE" -eq 0 ]; then
     print_step "Clearing workspace contents"

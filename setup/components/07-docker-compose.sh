@@ -2,9 +2,9 @@
 # =============================================================================
 # Script 07: Setup Docker Compose
 # =============================================================================
-# Purpose: Builds and starts Docker containers for Ollama, Agent, and Redis
+# Purpose: Builds and starts Docker containers for Ollama, Agent, Redis, and API
 # Dependencies: Docker installed, .env file exists
-# Output: Running containers: ollama, langgraph-agent, redis
+# Output: Running containers: ollama, langgraph-agent, redis, api-gateway
 # =============================================================================
 
 source "$(dirname "$0")/../common.sh"
@@ -54,7 +54,7 @@ sleep 5
 # Check container status
 print_step "Verifying container status..."
 
-CONTAINERS=("ollama" "langgraph-agent" "redis")
+CONTAINERS=("ollama" "langgraph-agent" "redis" "api-gateway")
 FAILED_CONTAINERS=()
 for container in "${CONTAINERS[@]}"; do
     if sudo docker ps --format 'table {{.Names}}' | grep -q "^$container$"; then

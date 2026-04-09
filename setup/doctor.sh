@@ -90,7 +90,7 @@ if sudo_available_noninteractive; then
         fail "Docker daemon is not reachable"
     fi
 
-    for container in ollama redis langgraph-agent; do
+    for container in ollama redis langgraph-agent api-gateway; do
         if sudo docker ps --format '{{.Names}}' | grep -qx "$container"; then
             status=$(sudo docker ps --filter "name=^/${container}$" --format '{{.Status}}' | head -n1)
             ok "Container $container is running ($status)"

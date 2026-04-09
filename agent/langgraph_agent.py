@@ -26,11 +26,17 @@ import subprocess
 import json
 import logging
 import sys
-from typing import TypedDict, Dict, Any, Optional
+from pathlib import Path
+from typing import TypedDict, Dict, Any
 import redis
 from github import Github, GithubException, Repository
 from langchain_community.llms import Ollama
 from langgraph.graph import StateGraph, END
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+from shared.repos import get_repository_map
+from shared.tasks import ERROR_CHANNEL, QUEUE_NAME, RESULT_CHANNEL, update_task
 
 # =============================================================================
 # Configuration (from environment variables)
@@ -74,11 +80,22 @@ except Exception as e:
     logger.error(f"Failed to connect to Redis: {e}")
     sys.exit(1)
 
-try:
-    llm = Ollama(model=MODEL_NAME, base_url=OLLAMA_URL, temperature=0.2)
-    # Test connection
+LLM_CACHE: Dict[str, Ollama] = {}
+
+
+def get_llm(model_name: str) -> Ollama:
+    if model_name in LLM_CACHE:
+        return LLM_CACHE[model_name]
+
+    llm = Ollama(model=model_name, base_url=OLLAMA_URL, temperature=0.2)
     llm.invoke("ping")
-    logger.info(f"Connected to Ollama at {OLLAMA_URL} with model {MODEL_NAME}")
+    LLM_CACHE[model_name] = llm
+    return llm
+
+
+try:
+    get_llm(MODEL_NAME)
+    logger.info(f"Connected to Ollama at {OLLAMA_URL} with default model {MODEL_NAME}")
 except Exception as e:
     logger.error(f"Failed to connect to Ollama: {e}")
     sys.exit(1)
@@ -91,41 +108,18 @@ except Exception as e:
     logger.error(f"Failed to authenticate with GitHub: {e}")
     sys.exit(1)
 
-# =============================================================================
-# Load repository configuration
-# =============================================================================
-def load_repositories() -> Dict[str, Dict[str, str]]:
-    """Load repository configurations from repos.json"""
-    config_file = os.path.join(CONFIG_REPO_PATH, "repos.json")
-    
-    if not os.path.exists(config_file):
-        logger.error(f"Config file not found: {config_file}")
-        return {}
-    
-    try:
-        with open(config_file, 'r') as f:
-            data = json.load(f)
-            repos = {}
-            for repo in data.get("repos", []):
-                repos[repo["name"]] = {
-                    "url": repo["url"],
-                    "branch": repo.get("branch", "main")
-                }
-            logger.info(f"Loaded {len(repos)} repositories from config")
-            return repos
-    except Exception as e:
-        logger.error(f"Failed to load repository config: {e}")
-        return {}
-
-REPOSITORIES = load_repositories()
+REPOSITORIES = get_repository_map()
+logger.info(f"Loaded {len(REPOSITORIES)} repositories from config")
 
 # =============================================================================
 # LangGraph State Definition
 # =============================================================================
 class AgentState(TypedDict):
     """State passed between graph nodes"""
+    task_id: str                 # Queue task ID
     project: str                 # Project name (key in REPOSITORIES)
     instruction: str             # User instruction
+    model_name: str              # Requested model or default
     repo_url: str                # Full GitHub URL
     repo_branch: str             # Target branch
     local_path: str              # Local clone path
@@ -217,6 +211,7 @@ def generate_changes(state: AgentState) -> AgentState:
     
     local_path = state["local_path"]
     instruction = state["instruction"]
+    model_name = state["model_name"]
     
     # Collect relevant files (limit to avoid token overflow)
     files_context = {}
@@ -271,8 +266,11 @@ RULES:
 JSON output:"""
 
     try:
-        logger.info(f"Sending prompt to LLM (instruction: {instruction[:50]}...)")
-        response = llm.invoke(prompt)
+        logger.info(
+            f"Sending prompt to Ollama model '{model_name}' "
+            f"(instruction: {instruction[:50]}...)"
+        )
+        response = get_llm(model_name).invoke(prompt)
         
         # Parse JSON response
         # Remove any markdown code blocks if present
@@ -425,15 +423,31 @@ def build_workflow() -> StateGraph:
 # =============================================================================
 # Task Processing Function
 # =============================================================================
-def process_task(project: str, instruction: str) -> Dict[str, Any]:
+def process_task(task: Dict[str, Any]) -> Dict[str, Any]:
     """Execute a single task through the LangGraph workflow"""
+    task_id = task["task_id"]
+    project = task["project"]
+    instruction = task["instruction"]
+    model_name = task.get("model") or MODEL_NAME
+
     logger.info(f"Processing task: project='{project}', instruction='{instruction[:50]}...'")
-    
+    update_task(
+        redis_client,
+        task_id,
+        status="running",
+        model=model_name,
+        error="",
+        pr_url="",
+        success="",
+    )
+
     app = build_workflow()
     
     initial_state: AgentState = {
+        "task_id": task_id,
         "project": project,
         "instruction": instruction,
+        "model_name": model_name,
         "repo_url": "",
         "repo_branch": "",
         "local_path": "",
@@ -447,12 +461,23 @@ def process_task(project: str, instruction: str) -> Dict[str, Any]:
         final_state = app.invoke(initial_state)
         
         result = {
+            "task_id": task_id,
             "project": project,
             "instruction": instruction,
+            "model": model_name,
             "success": not bool(final_state.get("error")),
             "pr_url": final_state.get("pr_url", ""),
             "error": final_state.get("error", "")
         }
+
+        update_task(
+            redis_client,
+            task_id,
+            status="completed" if result["success"] else "failed",
+            pr_url=result["pr_url"],
+            error=result["error"],
+            success=result["success"],
+        )
         
         if result["success"]:
             logger.info(f"Task completed successfully. PR: {result['pr_url']}")
@@ -463,13 +488,24 @@ def process_task(project: str, instruction: str) -> Dict[str, Any]:
         
     except Exception as e:
         logger.exception(f"Unexpected error processing task")
-        return {
+        result = {
+            "task_id": task_id,
             "project": project,
             "instruction": instruction,
+            "model": model_name,
             "success": False,
             "pr_url": "",
             "error": str(e)
         }
+        update_task(
+            redis_client,
+            task_id,
+            status="failed",
+            pr_url="",
+            error=result["error"],
+            success=False,
+        )
+        return result
 
 # =============================================================================
 # Main Loop - Listen for Tasks
@@ -486,10 +522,6 @@ def main():
     logger.info("=" * 60)
     logger.info("Listening for tasks on Redis list 'task:queue'...")
     
-    QUEUE_NAME = "task:queue"
-    RESULT_CHANNEL = "task:results"
-    ERROR_CHANNEL = "task:errors"
-    
     while True:
         try:
             # Blocking pop from Redis list (timeout 10 seconds)
@@ -500,15 +532,18 @@ def main():
                 
                 try:
                     task = json.loads(task_json)
+                    task_id = task.get("task_id")
                     project = task.get("project")
                     instruction = task.get("instruction")
                     
-                    if not project or not instruction:
-                        logger.error(f"Invalid task format: missing project or instruction - {task_json}")
+                    if not task_id or not project or not instruction:
+                        logger.error(
+                            f"Invalid task format: missing task_id, project, or instruction - {task_json}"
+                        )
                         continue
                     
                     # Process the task
-                    task_result = process_task(project, instruction)
+                    task_result = process_task(task)
                     
                     # Publish result
                     if task_result["success"]:

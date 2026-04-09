@@ -268,6 +268,24 @@ docker compose up -d
 
 The gateway writes a task to Redis queue; the agent polls or listens, executes, and pushes results back (e.g., textual answer, PR link, written chapters).
 
+## Web UI and REST API
+
+The repository now includes a small FastAPI gateway that exposes:
+
+- a LAN-only web UI at `http://<vm-ip>:8000`
+- a REST API for task submission and status lookup
+- an auth-ready boundary so anonymous LAN mode can later evolve into authenticated access without replacing the architecture
+
+Current endpoints:
+
+- `GET /health`
+- `GET /api/projects`
+- `POST /api/tasks`
+- `GET /api/tasks`
+- `GET /api/tasks/{task_id}`
+
+The gateway stores durable task metadata in Redis using a generated `task_id`, and the agent updates that task state as work moves from `queued` to `running` to `completed` or `failed`.
+
 
 
 ---

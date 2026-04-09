@@ -1,10 +1,11 @@
 # =============================================================================
 # Docker Compose Configuration for AI Agent System
 # =============================================================================
-# Purpose: Orchestrates three services:
+# Purpose: Orchestrates four services:
 #   1. ollama    - Local LLM server (DeepSeek)
 #   2. redis     - Task queue and state storage
 #   3. agent     - LangGraph AI agent that processes tasks
+#   4. api       - FastAPI gateway and local web UI
 # =============================================================================
 
 networks:
@@ -97,6 +98,7 @@ services:
       - ../settings/repos:/settings/repos:ro # Repository configs (read-only)
       - ../.env:/app/.env:ro # Secrets (read-only)
       - ../agent:/app/agent # Agent code (for development)
+      - ../shared:/app/shared # Shared task/config helpers
     working_dir: /app
     command: python -u agent/langgraph_agent.py
     deploy:
@@ -106,6 +108,45 @@ services:
           cpus: '1.0'
     healthcheck:
       test: [ "CMD", "python", "-c", "import redis; r=redis.Redis(host='redis'); r.ping()" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # --------------------------------------------------------------------------
+  # Service 4: API Gateway and Web UI
+  # --------------------------------------------------------------------------
+  api-gateway:
+    env_file:
+      - ../.env
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.agent
+    container_name: api-gateway
+    restart: unless-stopped
+    networks:
+      - ai-network
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - CONFIG_REPO_PATH=/settings/repos
+      - AUTH_MODE=anonymous
+    volumes:
+      - ../settings/repos:/settings/repos:ro
+      - ../api:/app/api
+      - ../shared:/app/shared
+    working_dir: /app
+    command: uvicorn api.main:app --host 0.0.0.0 --port 8000
+    ports:
+      - "8000:8000"
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+    healthcheck:
+      test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health').read()" ]
       interval: 30s
       timeout: 10s
       retries: 3
