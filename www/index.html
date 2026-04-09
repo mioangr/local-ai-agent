@@ -4,69 +4,58 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Local AI Agent</title>
+  <link rel="stylesheet" href="/www/common.css">
   <style>
     :root {
       --bg: #f4efe4;
-      --panel: #fffdf8;
+      --panel-bg: #fffdf8;
       --ink: #18232f;
       --muted: #5a6a78;
       --accent: #0b6e4f;
       --border: #d9d1c2;
     }
-    * { box-sizing: border-box; }
     body {
-      margin: 0;
-      font-family: Georgia, "Times New Roman", serif;
       color: var(--ink);
       background:
         radial-gradient(circle at top left, rgba(11, 110, 79, 0.12), transparent 28%),
         linear-gradient(180deg, #faf6ed 0%, var(--bg) 100%);
     }
-    main {
-      width: min(1100px, calc(100% - 32px));
-      margin: 32px auto 48px;
+    .dashboard-layout {
       display: grid;
       gap: 24px;
       grid-template-columns: 1.1fr 0.9fr;
     }
-    .hero, .panel {
-      background: color-mix(in srgb, var(--panel) 92%, white 8%);
+    .hero,
+    .panel {
+      background: color-mix(in srgb, var(--panel-bg) 92%, white 8%);
       border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 24px;
       box-shadow: 0 18px 50px rgba(24, 35, 47, 0.08);
     }
-    h1, h2 { margin: 0 0 12px; }
-    p { margin: 0 0 12px; color: var(--muted); line-height: 1.5; }
-    form { display: grid; gap: 14px; margin-top: 20px; }
-    label { font-size: 0.95rem; font-weight: 700; }
-    input, select, textarea, button {
-      width: 100%;
-      border-radius: 12px;
+    p {
+      color: var(--muted);
+    }
+    form {
+      margin-top: 20px;
+    }
+    input,
+    select,
+    textarea,
+    button {
       border: 1px solid var(--border);
-      padding: 12px 14px;
-      font: inherit;
       background: #fff;
       color: var(--ink);
     }
-    textarea { min-height: 180px; resize: vertical; }
+    textarea {
+      min-height: 180px;
+    }
     button {
       background: var(--accent);
       color: #fff;
-      border: 0;
-      cursor: pointer;
       font-weight: 700;
     }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.95rem;
-    }
-    th, td {
-      text-align: left;
-      padding: 10px 8px;
+    th,
+    td {
       border-bottom: 1px solid var(--border);
-      vertical-align: top;
     }
     .badge {
       display: inline-block;
@@ -83,14 +72,13 @@
       flex-wrap: wrap;
       margin-bottom: 18px;
     }
-    a { color: var(--accent); text-decoration: none; }
-    @media (max-width: 860px) {
-      main { grid-template-columns: 1fr; }
+    a {
+      color: var(--accent);
     }
   </style>
 </head>
 <body>
-  <main>
+  <main class="dashboard-layout">
     <section class="hero">
       <div class="nav">
         <span class="badge">Auth mode: {{ auth_mode }}</span>

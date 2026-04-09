@@ -1,1 +1,11 @@
-This folder contains files and scripts that define the various settings of the machine. These settings might change from time to time. (As opposed to the files and scripts at the setup folder that are run only during the initial setup)
+# Archived Settings Notes
+
+This folder contains archived notes about machine settings and related configuration ideas.
+
+It is reference material, not part of the active install or runtime path.
+
+## Files
+
+| File | Purpose |
+|------|---------|
+| `README.md` | Describes the role of this archived settings folder. |

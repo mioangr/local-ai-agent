@@ -9,6 +9,7 @@ This folder contains all Docker-related files for containerizing the AI agent.
 | `docker-compose.yml` | Orchestrates Ollama, Redis, the agent, and the API gateway |
 | `Dockerfile.agent` | Builds the shared Python image used by the agent and API |
 | `requirements.txt` | Python dependencies for the agent and API |
+| `README.md` | Folder-local documentation for the Docker assets |
 
 ## Container Overview
 

@@ -100,14 +100,18 @@ To achieve the stated goals, the following components are required:
 ```
 local-ai-agent/                        # Subfolder where everything is installed.
 ├── README.md                          # Main project documentation (updated)
+├── 0-Prerequisites/                   # Pre-install VM preparation assets. Read more in folder 0-Prerequisites
 ├── install.conf                       # Shared install configuration
+├── api/                               # FastAPI gateway code. Read more in folder api
+├── shared/                            # Shared Python helpers. Read more in folder shared
 ├── setup/                             # Setup, recovery, and installer files
 │   ├── setup.sh                       # Umbrella setup script
 │   ├── common.sh                      # Shared setup helpers
 │   ├── doctor.sh                      # Diagnose the installation and runtime
 │   ├── reset-install.sh               # Remove the installation
 │   ├── reset-runtime.sh               # Reset transient runtime state
-│   ├── components/                    # One-time setup components
+│   ├── README.md                      # Folder-local setup documentation
+│   ├── components/                    # One-time setup components. Read more in folder setup/components
 │   │   ├── README.md                  # Overview of setup components
 │   │   ├── 01-system-deps.sh          # Install system dependencies
 │   │   ├── 02-docker.sh               # Install Docker
@@ -117,21 +121,23 @@ local-ai-agent/                        # Subfolder where everything is installed
 │   │   ├── 06-directories.sh          # Create directory structure
 │   │   ├── 07-docker-compose.sh       # Setup Docker Compose
 │   │   └── 08-pull-model.sh           # Pull configured Ollama model
-│   └── docker/                        # Docker-related setup files
+│   └── docker/                        # Docker-related setup files. Read more in folder setup/docker
 │       ├── README.md                  # Docker setup documentation
 │       ├── docker-compose.yml         # Main compose file
 │       ├── Dockerfile.agent           # Agent container build
 │       └── requirements.txt           # Python dependencies
-├── run/                               # Daily runtime scripts
+├── run/                               # Daily runtime scripts. Read more in folder run
 │   ├── README.md                      # Runtime script documentation
 │   └── send_task.py                   # Send task to agent
-├── settings/repos/                    # Repository configurations
-│   ├── README.md                      # Documentation for repo configs
-│   └── repos.json                     # List of managed repositories
-├── agent/                             # Agent code
+├── settings/                          # Editable runtime settings. Read more in folder settings
+│   └── repos/                         # Repository configurations. Read more in folder settings/repos
+│       ├── README.md                  # Documentation for repo configs
+│       └── repos.json                 # List of managed repositories
+├── agent/                             # Agent code. Read more in folder agent
 │   ├── README.md                      # Agent documentation
 │   ├── langgraph_agent.py             # Main agent script
 │   └── repo_manager.py                # Repository management utilities
+├── www/                               # Rendered web pages and forms. Read more in folder www
 └── logs/                              # Log files (created at runtime)
 ```
 

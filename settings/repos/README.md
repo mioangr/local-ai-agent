@@ -1,12 +1,17 @@
 # Repository Configuration
 
-This folder stores configuration for all repositories that the AI agent can work with.
+This folder stores the repository definitions that the agent and API use when validating project names.
 
-## File: `repos.json`
+Its purpose is to keep the list of allowed repositories in one editable place outside the application code.
 
-This JSON file defines which repositories the agent can access and modify.
+## Files
 
-### Format
+| File | Purpose |
+|------|---------|
+| `repos.json` | Defines the repositories the agent can access, along with each repository's default target branch. |
+| `README.md` | Explains the structure and intended use of this folder. |
+
+## `repos.json` Format
 
 ```json
 {
@@ -20,50 +25,22 @@ This JSON file defines which repositories the agent can access and modify.
 }
 ```
 
-### Fields
-Field |	Required | Description |
-|------|---------|---------|
-| name	| Yes	| Short identifier used in commands (e.g., --project my-app) |
-| url	| Yes	| Full GitHub URL (HTTPS format) |
-| branch	| Yes	| Default branch to create PRs against |
+## Fields
 
-### Managing Repositories
+| Field | Required | Description |
+|------|---------|---------|
+| `name` | Yes | Short identifier used by the CLI and API, for example `--project my-app`. |
+| `url` | Yes | Full GitHub repository URL. |
+| `branch` | Yes | Default branch to target for pull requests. |
+
+## Managing Repositories
+
 Edit the JSON file directly:
+
 ```bash
 nano /home/aiuser/local-ai-agent/settings/repos/repos.json
 ```
 
-### Security Note
-The GitHub token in .env must have access to all repositories listed here. If a repository is private, the token must have repo scope.
+## Security Note
 
-#### Example
-```json
-{
-  "repos": [
-    {
-      "name": "personal-blog",
-      "url": "https://github.com/a_username/blog",
-      "branch": "main"
-    },
-    {
-      "name": "work-api",
-      "url": "https://github.com/company/api-gateway",
-      "branch": "develop"
-    }
-  ]
-}
-```
-
-#### `settings/repos/repos.json`
-
-```json
-{
-  "repos": [
-    {
-      "name": "example-project",
-      "url": "https://github.com/yourusername/YOUR_REPO",
-      "branch": "main"
-    }
-  ]
-}
-```
+The GitHub token in `.env` must have access to every repository listed here.

@@ -17,6 +17,7 @@ Shared installer helpers live in `setup/common.sh`.
 | `06-directories.sh` | Creates project folder structure | After secrets |
 | `07-docker-compose.sh` | Builds and starts Docker containers | After directories |
 | `08-pull-model.sh` | Downloads the configured Ollama model via Ollama | Last step |
+| `README.md` | Describes the role of this folder and the expected behavior of each setup component | Reference |
 
 ## Error Handling
 
