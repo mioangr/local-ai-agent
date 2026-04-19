@@ -193,6 +193,11 @@ curl -s https://raw.githubusercontent.com/mioangr/local-ai-agent/main/setup/inst
 ```
 
 Run the deployment from your **main Linux user account**.  
+
+If your main user is `iadmin`, you can alternative run the command via SSH:
+ ssh iadmin@[IP]
+
+
 It will create a temporary subfolder (e.g., `temp-web-install`) in your home directory, clone the repository into it, and run the setup.sh script from there.   
 
 Most setup steps are safe to rerun, and the recovery scripts above can help if a previous install stopped halfway. The bootstrap performs:

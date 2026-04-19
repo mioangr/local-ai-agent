@@ -11,6 +11,7 @@
 set -e
 
 TEMP_INSTALL_DIR="temp-web-install"
+BACKUP_ENV_FILE=""
 
 load_install_config() {
     if [ -f "install.conf" ]; then
@@ -63,6 +64,13 @@ if [ -d "$INSTALL_ROOT" ]; then
     git clone https://github.com/mioangr/local-ai-agent.git "$TEMP_INSTALL_DIR"
     cd "$TEMP_INSTALL_DIR"
 
+    if [ -f "$INSTALL_ROOT/.env" ]; then
+        BACKUP_ENV_FILE="$(mktemp)"
+        cp "$INSTALL_ROOT/.env" "$BACKUP_ENV_FILE"
+        chmod 600 "$BACKUP_ENV_FILE"
+        echo "Backed up the existing secrets file so the reinstall can reuse saved values."
+    fi
+
     echo "Requesting sudo access for cleanup and setup..."
     sudo -v
 
@@ -87,4 +95,9 @@ sudo -v
 
 echo "Running main setup script..."
 # Run the setup script with sudo
-sudo ./setup/setup.sh
+if [ -n "$BACKUP_ENV_FILE" ]; then
+    sudo LOCAL_AI_AGENT_ENV_BACKUP="$BACKUP_ENV_FILE" ./setup/setup.sh
+    rm -f "$BACKUP_ENV_FILE"
+else
+    sudo ./setup/setup.sh
+fi

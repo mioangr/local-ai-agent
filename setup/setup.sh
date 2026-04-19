@@ -18,6 +18,8 @@ SETUP_DIR="$SCRIPT_DIR/components"
 # Source common functions
 source "$SCRIPT_DIR/common.sh"
 
+clear_staged_env
+
 sudo mkdir -p "$LOGS_DIR"
 sudo touch "$LOGS_DIR/activity.log"
 exec > >(tee -a "$LOGS_DIR/activity.log") 2>&1
@@ -91,6 +93,8 @@ run_subscript "Step 7/8" "07-docker-compose.sh" "Docker Compose setup failed"
 # Step 8: Pull LLM model
 print_step "Step 8/8: Downloading configured Ollama model (this may take several minutes)"
 run_subscript "Step 8/8" "08-pull-model.sh" "Model download failed"
+
+clear_staged_env
 
 print_header "Setup Complete! 🎉"
 echo ""

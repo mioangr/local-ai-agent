@@ -11,16 +11,6 @@ source "$(dirname "$0")/../common.sh"
 
 print_header "Configuring Secrets"
 
-get_env_value() {
-    local key="$1"
-
-    if [ ! -f "$ENV_FILE" ]; then
-        return 1
-    fi
-
-    grep -E "^${key}=" "$ENV_FILE" | tail -n 1 | cut -d= -f2-
-}
-
 mask_token() {
     local token="$1"
     local token_length=${#token}
@@ -33,10 +23,12 @@ mask_token() {
     printf '%s\n' "${token:0:4}...${token: -4}"
 }
 
-EXISTING_GITHUB_TOKEN="$(get_env_value "GITHUB_TOKEN")"
-EXISTING_GITHUB_USERNAME="$(get_env_value "GITHUB_USERNAME")"
+EXISTING_GITHUB_TOKEN="$(get_saved_env_value "GITHUB_TOKEN" || true)"
+EXISTING_GITHUB_USERNAME="$(get_saved_env_value "GITHUB_USERNAME" || true)"
+EXISTING_AIUSER_PASSWORD="$(get_saved_env_value "AIUSER_PASSWORD" || true)"
 GITHUB_TOKEN="$EXISTING_GITHUB_TOKEN"
 GITHUB_USERNAME="$EXISTING_GITHUB_USERNAME"
+AIUSER_PASSWORD="$EXISTING_AIUSER_PASSWORD"
 
 NEEDS_GITHUB_TOKEN_PROMPT=true
 NEEDS_GITHUB_USERNAME_PROMPT=true
@@ -57,6 +49,10 @@ if [ -n "$EXISTING_GITHUB_USERNAME" ]; then
         NEEDS_GITHUB_USERNAME_PROMPT=false
         print_step "Keeping the existing GitHub username"
     fi
+fi
+
+if [ -n "$EXISTING_AIUSER_PASSWORD" ]; then
+    print_step "A saved login password for $AI_USER was found in the existing secrets."
 fi
 
 if [ "$NEEDS_GITHUB_TOKEN_PROMPT" = true ]; then
@@ -97,6 +93,9 @@ sudo tee "$ENV_FILE" > /dev/null << EOF
 GITHUB_TOKEN=$GITHUB_TOKEN
 GITHUB_USERNAME=$GITHUB_USERNAME
 
+# Local Linux User
+AIUSER_PASSWORD=$AIUSER_PASSWORD
+
 # LLM Configuration
 OLLAMA_URL=http://ollama:11434
 MODEL_NAME=$MODEL_NAME
@@ -114,4 +113,5 @@ sudo chown $AI_USER:$AI_USER "$ENV_FILE"
 echo ""
 print_step "Secrets configured successfully"
 echo "✓ Token stored securely in $ENV_FILE"
+echo "✓ Saved login password state for $AI_USER stored in $ENV_FILE"
 echo "✓ Permissions set to 600 (readable only by $AI_USER)"

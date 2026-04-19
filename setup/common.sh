@@ -34,6 +34,9 @@ REPOS_DIR="$SETTINGS_DIR/repos"
 LOGS_DIR="$INSTALL_ROOT/logs"
 WORKSPACE_DIR="$INSTALL_ROOT/workspace"
 COMPOSE_FILE="$DOCKER_DIR/docker-compose.yml"
+BACKUP_ENV_FILE="${LOCAL_AI_AGENT_ENV_BACKUP:-}"
+INSTALL_STATE_DIR="${TMPDIR:-/tmp}/local-ai-agent-installer"
+STAGED_ENV_FILE="$INSTALL_STATE_DIR/${AI_USER}-${INSTALL_DEST_DIR}.env"
 
 export PROJECT_ROOT
 export INSTALL_CONFIG_FILE
@@ -53,6 +56,9 @@ export REPOS_DIR
 export LOGS_DIR
 export WORKSPACE_DIR
 export COMPOSE_FILE
+export BACKUP_ENV_FILE
+export INSTALL_STATE_DIR
+export STAGED_ENV_FILE
 
 # Colors
 RED='\033[0;31m'
@@ -269,4 +275,62 @@ format_command() {
     done
 
     printf '%s\n' "$formatted"
+}
+
+get_env_value_from_file() {
+    local file_path="$1"
+    local key="$2"
+
+    if [ ! -f "$file_path" ]; then
+        return 1
+    fi
+
+    grep -E "^${key}=" "$file_path" | tail -n 1 | cut -d= -f2-
+}
+
+get_saved_env_value() {
+    local key="$1"
+    local value=""
+
+    value="$(get_env_value_from_file "$ENV_FILE" "$key" 2>/dev/null || true)"
+    if [ -n "$value" ]; then
+        printf '%s\n' "$value"
+        return 0
+    fi
+
+    value="$(get_env_value_from_file "$STAGED_ENV_FILE" "$key" 2>/dev/null || true)"
+    if [ -n "$value" ]; then
+        printf '%s\n' "$value"
+        return 0
+    fi
+
+    value="$(get_env_value_from_file "$BACKUP_ENV_FILE" "$key" 2>/dev/null || true)"
+    if [ -n "$value" ]; then
+        printf '%s\n' "$value"
+        return 0
+    fi
+
+    return 1
+}
+
+stage_env_value() {
+    local key="$1"
+    local value="$2"
+    local tmp_file
+
+    mkdir -p "$INSTALL_STATE_DIR"
+    chmod 700 "$INSTALL_STATE_DIR"
+    tmp_file="$(mktemp "$INSTALL_STATE_DIR/staged.XXXXXX")"
+
+    if [ -f "$STAGED_ENV_FILE" ]; then
+        grep -Ev "^${key}=" "$STAGED_ENV_FILE" > "$tmp_file" || true
+    fi
+
+    printf '%s=%s\n' "$key" "$value" >> "$tmp_file"
+    chmod 600 "$tmp_file"
+    mv "$tmp_file" "$STAGED_ENV_FILE"
+}
+
+clear_staged_env() {
+    rm -f "$STAGED_ENV_FILE"
 }

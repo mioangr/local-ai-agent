@@ -11,12 +11,46 @@ source "$(dirname "$0")/../common.sh"
 
 print_header "Creating AI User"
 
+set_user_password() {
+    local password="$1"
+
+    print_step "Applying login password for $AI_USER..."
+    printf '%s:%s\n' "$AI_USER" "$password" | sudo chpasswd
+    check_error "Failed to set password for $AI_USER"
+    stage_env_value "AIUSER_PASSWORD" "$password"
+}
+
+prompt_for_new_password() {
+    local first_password
+    local second_password
+
+    while true; do
+        prompt_secret "Enter the new login password for $AI_USER: " first_password
+        prompt_secret "Confirm the new login password for $AI_USER: " second_password
+
+        if [ -z "$first_password" ]; then
+            print_warning "Password cannot be empty."
+            continue
+        fi
+
+        if [ "$first_password" != "$second_password" ]; then
+            print_warning "Passwords did not match. Please try again."
+            continue
+        fi
+
+        set_user_password "$first_password"
+        break
+    done
+}
+
+EXISTING_AIUSER_PASSWORD="$(get_saved_env_value "AIUSER_PASSWORD" || true)"
+
 # Check if user already exists
 if id "$AI_USER" &>/dev/null; then
     print_warning "User $AI_USER already exists"
     prompt_yes_no "Recreate user? (y/n) " REPLY
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        echo "Skipping user creation"
+        print_step "Keeping the existing $AI_USER account and its current login password"
         exit 0
     fi
     
@@ -32,18 +66,31 @@ sudo useradd -m -s /bin/bash -U $AI_USER
 check_error "Failed to create user $AI_USER"
 
 # Set password (optional)
-prompt_yes_no "Set a login password for $AI_USER now? (y/n) " REPLY
-if [[ $REPLY =~ ^[Yy]$ ]]; then
-    print_step "Setting password for $AI_USER..."
-    if [ "$(id -u)" -eq 0 ]; then
-        run_interactive_command passwd "$AI_USER"
+if [ -n "$EXISTING_AIUSER_PASSWORD" ]; then
+    print_warning "A saved login password for $AI_USER was found in the existing secrets."
+    prompt_yes_no "Reuse the saved password for the recreated $AI_USER account? (y/n) " REPLY
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        set_user_password "$EXISTING_AIUSER_PASSWORD"
     else
-        run_interactive_command sudo passwd "$AI_USER"
+        echo "Answering 'n' means the recreated $AI_USER account will not get that saved password automatically."
+        prompt_yes_no "Set a different login password for $AI_USER now? (y/n) " REPLY
+        if [[ $REPLY =~ ^[Yy]$ ]]; then
+            prompt_for_new_password
+        else
+            print_warning "Skipping password setup for $AI_USER"
+            echo "  The recreated account currently has no password set."
+            echo "  You can set it later with: sudo passwd $AI_USER"
+        fi
     fi
-    check_error "Failed to set password for $AI_USER"
 else
-    print_warning "Skipping password setup for $AI_USER"
-    echo "  You can set it later with: sudo passwd $AI_USER"
+    prompt_yes_no "Set a login password for $AI_USER now? (y/n) " REPLY
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        prompt_for_new_password
+    else
+        print_warning "Skipping password setup for $AI_USER"
+        echo "  The new account currently has no password set."
+        echo "  You can set it later with: sudo passwd $AI_USER"
+    fi
 fi
 
 # Add user to docker group
