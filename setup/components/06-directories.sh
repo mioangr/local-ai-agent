@@ -16,6 +16,9 @@ DIRECTORIES=(
     "$INSTALL_ROOT"
     "$DOCKER_DIR"
     "$AGENT_DIR"
+    "$INSTALL_ROOT/api"
+    "$INSTALL_ROOT/shared"
+    "$INSTALL_ROOT/www"
     "$INSTALL_SETUP_DIR"
     "$RUN_DIR"
     "$REPOS_DIR"
@@ -46,6 +49,27 @@ if [ -d "$PROJECT_ROOT/agent" ]; then
     sudo cp -r "$PROJECT_ROOT/agent/"* "$AGENT_DIR/"
     sudo chown -R "$AI_USER:$AI_USER" "$AGENT_DIR"
     echo "  ✓ Copied agent files"
+fi
+
+# Copy API files
+if [ -d "$PROJECT_ROOT/api" ]; then
+    sudo cp -r "$PROJECT_ROOT/api/"* "$INSTALL_ROOT/api/"
+    sudo chown -R "$AI_USER:$AI_USER" "$INSTALL_ROOT/api"
+    echo "  ✓ Copied API files"
+fi
+
+# Copy shared files
+if [ -d "$PROJECT_ROOT/shared" ]; then
+    sudo cp -r "$PROJECT_ROOT/shared/"* "$INSTALL_ROOT/shared/"
+    sudo chown -R "$AI_USER:$AI_USER" "$INSTALL_ROOT/shared"
+    echo "  ✓ Copied shared files"
+fi
+
+# Copy web UI files
+if [ -d "$PROJECT_ROOT/www" ]; then
+    sudo cp -r "$PROJECT_ROOT/www/"* "$INSTALL_ROOT/www/"
+    sudo chown -R "$AI_USER:$AI_USER" "$INSTALL_ROOT/www"
+    echo "  ✓ Copied web UI files"
 fi
 
 # Copy setup files
@@ -86,6 +110,9 @@ echo "Directory layout:"
 echo "  $INSTALL_ROOT/"
 echo "  ├── docker/          - Docker compose and container files"
 echo "  ├── agent/           - AI agent Python code"
+echo "  ├── api/             - FastAPI gateway code"
+echo "  ├── shared/          - Shared Python helpers"
+echo "  ├── www/             - Web UI assets"
 echo "  ├── setup/           - Setup and recovery scripts"
 echo "  ├── run/             - Daily runtime scripts (send_task, etc.)"
 echo "  ├── settings/repos/  - Repository configurations"
