@@ -19,3 +19,20 @@ Its purpose is to install the stack, verify it, and help recover from partial or
 
 Read more in folder `setup/components`.
 Read more in folder `setup/docker`.
+
+## Web Updater Password
+
+The browser-based live updater uses a dedicated secret stored in the installation `.env` file:
+
+```bash
+UPDATE_UI_PASSWORD=choose-a-strong-password
+```
+
+This password is only for approving browser-triggered live updates. It should be different from the Linux login password for `aiuser`.
+
+If you add or rotate this password later, restart only the API service so the web UI picks up the new value:
+
+```bash
+cd /home/aiuser/local-ai-agent/docker
+docker compose up -d --force-recreate api-gateway
+```

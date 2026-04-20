@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Updates</title>
+  <link rel="stylesheet" href="/www/common.css">
+  <style>
+    :root {
+      --bg: #f2eee6;
+      --panel-bg: #fffdf8;
+      --ink: #1a2530;
+      --muted: #5b6b76;
+      --accent: #0f6b57;
+      --accent-soft: #dfece7;
+      --warn: #8f5c12;
+      --warn-soft: #f4e8c8;
+      --border: #d9d1c2;
+    }
+    body {
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top right, rgba(15, 107, 87, 0.12), transparent 24%),
+        linear-gradient(180deg, #f8f4ed 0%, var(--bg) 100%);
+    }
+    .panel {
+      max-width: 860px;
+      margin: 0 auto;
+      background: var(--panel-bg);
+      border: 1px solid var(--border);
+      box-shadow: 0 18px 50px rgba(26, 37, 48, 0.08);
+    }
+    .nav {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+    }
+    .pill {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+    p,
+    li {
+      color: var(--muted);
+    }
+    a {
+      color: var(--accent);
+    }
+    button {
+      border: 1px solid var(--border);
+      background: var(--accent);
+      color: #fff;
+      font-weight: 700;
+    }
+    .status-card {
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 18px;
+      background: #fff;
+    }
+    .status-up-to-date,
+    .status-updated,
+    .status-update-available {
+      background: #f7fbf9;
+    }
+    .status-full-setup-required,
+    .status-error {
+      background: var(--warn-soft);
+    }
+    .meta {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 14px;
+      margin-top: 18px;
+    }
+    .meta strong {
+      display: block;
+      color: var(--ink);
+      margin-bottom: 4px;
+    }
+    .actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 20px;
+    }
+    .help-box {
+      margin-top: 20px;
+      padding: 16px 18px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.85);
+    }
+    .help-box code,
+    .help-box pre {
+      font-size: 0.95rem;
+    }
+    .password-field {
+      margin-top: 14px;
+    }
+    input {
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--ink);
+    }
+    ul {
+      margin-top: 16px;
+    }
+  </style>
+</head>
+<body>
+  <main class="panel">
+    <div class="nav">
+      <span class="pill">Updater</span>
+      <a href="/">Task dashboard</a>
+      <a href="/chat">AI Chat</a>
+      <a href="/status">System Status</a>
+    </div>
+    <h1>Software Updates</h1>
+    <p>The updater compares the installed release manifest with the latest release manifest online and only applies files declared as live-update safe.</p>
+
+    <section class="status-card status-{{ update.status }}">
+      <h2>{{ update.title }}</h2>
+      <p>{{ update.message }}</p>
+
+      <div class="meta">
+        <div>
+          <strong>Installed version</strong>
+          <span>{{ update.installed_version or "Unknown" }}</span>
+        </div>
+        <div>
+          <strong>Available version</strong>
+          <span>{{ update.available_version or "Unknown" }}</span>
+        </div>
+        <div>
+          <strong>Minimum setup version</strong>
+          <span>{{ update.minimum_setup_version or "Not declared" }}</span>
+        </div>
+      </div>
+
+      {% if update.updated_files %}
+      <h3>Updated files</h3>
+      <ul>
+        {% for file_path in update.updated_files %}
+        <li>{{ file_path }}</li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+
+      <div class="actions">
+        <a href="/updates">Refresh status</a>
+        {% if update.can_apply %}
+        <form action="/updates/apply" method="post">
+          {% if update_password_enabled %}
+          <div class="password-field">
+            <label for="update-password">Update password</label>
+            <input id="update-password" name="update_password" type="password" required>
+          </div>
+          {% endif %}
+          <button type="submit">Apply live update</button>
+        </form>
+        {% endif %}
+      </div>
+
+      {% if not update_password_enabled %}
+      <div class="help-box">
+        <h3>Web updater is not unlocked yet</h3>
+        <p>The API service does not currently have an <code>UPDATE_UI_PASSWORD</code> configured, so the browser can check versions but cannot apply a live update yet.</p>
+        <p>Add the password to the installed <code>.env</code> file and restart only the API service:</p>
+        <pre><code>cd /home/aiuser/local-ai-agent
+sudo editor .env
+
+UPDATE_UI_PASSWORD=your-password-here
+
+cd /home/aiuser/local-ai-agent/docker
+docker compose up -d --force-recreate api-gateway</code></pre>
+      </div>
+      {% endif %}
+    </section>
+  </main>
+</body>
+</html>

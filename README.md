@@ -241,7 +241,27 @@ Web pages after setup:
 - Main task dashboard: `http://[vm-IP]:8000/`
 - Browser chat with the local model: `http://[vm-IP]:8000/chat`
 - System status page: `http://[vm-IP]:8000/status`
+- Software updates page: `http://[vm-IP]:8000/updates`
 - Task detail page: `http://[vm-IP]:8000/tasks/<task_id>`
+
+### Browser-Based Live Updates
+
+The installation can expose a browser-based updater for files that are declared safe for live replacement. The updater checks the installed version against the online manifest and can block releases that require a full setup rerun.
+
+To allow a user to apply a live update from the browser, set a dedicated updater password in the installed `.env` file:
+
+```bash
+UPDATE_UI_PASSWORD=choose-a-strong-password
+```
+
+This password is separate from the Linux password for `aiuser` and is only used to authorize browser-triggered updates.
+
+If you add or rotate `UPDATE_UI_PASSWORD`, restart only the API container:
+
+```bash
+cd /home/aiuser/local-ai-agent/docker
+docker compose up -d --force-recreate api-gateway
+```
 
 If you ever need to start the environment manually again:
 

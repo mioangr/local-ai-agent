@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 """FastAPI gateway for the local AI agent."""
 
+import json
 import os
+import subprocess
 import sys
+import secrets
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -25,6 +28,8 @@ from shared.logging_utils import APP_LOG_FILE, configure_file_logger, ensure_log
 APP_TITLE = "Local AI Agent Gateway"
 APP_VERSION = "0.1.0"
 AUTH_MODE = os.getenv("AUTH_MODE", "anonymous")
+UPDATER_SCRIPT = Path(__file__).resolve().parent.parent / "program-files" / "updater" / "updater.sh"
+UPDATE_UI_PASSWORD = os.getenv("UPDATE_UI_PASSWORD", "")
 
 app = FastAPI(title=APP_TITLE, version=APP_VERSION)
 templates = Jinja2Templates(directory=str(Path(__file__).resolve().parent.parent / "www"))
@@ -107,6 +112,83 @@ def get_models_context() -> Dict[str, Any]:
             "model_names": [],
             "models_error": f"Could not load installed models: {exc}",
         }
+
+
+def run_updater(command: str) -> Dict[str, Any]:
+    if not UPDATER_SCRIPT.exists():
+        return {
+            "status": "error",
+            "message": f"Updater script not found at {UPDATER_SCRIPT}.",
+            "installed_version": "",
+            "available_version": "",
+            "requires_full_setup": False,
+            "minimum_setup_version": "",
+            "updated_files": [],
+        }
+
+    result = subprocess.run(
+        [str(UPDATER_SCRIPT), command, "--json"],
+        capture_output=True,
+        text=True,
+        timeout=180,
+        check=False,
+    )
+
+    payload_text = result.stdout.strip() or result.stderr.strip()
+    if not payload_text:
+        return {
+            "status": "error",
+            "message": "The updater did not return any output.",
+            "installed_version": "",
+            "available_version": "",
+            "requires_full_setup": False,
+            "minimum_setup_version": "",
+            "updated_files": [],
+        }
+
+    try:
+        payload = json.loads(payload_text)
+    except json.JSONDecodeError:
+        return {
+            "status": "error",
+            "message": payload_text,
+            "installed_version": "",
+            "available_version": "",
+            "requires_full_setup": False,
+            "minimum_setup_version": "",
+            "updated_files": [],
+        }
+
+    return {
+        "status": payload.get("status", "error"),
+        "message": payload.get("message", "Updater completed without a message."),
+        "installed_version": payload.get("installed_version", ""),
+        "available_version": payload.get("available_version", ""),
+        "requires_full_setup": bool(payload.get("requires_full_setup", False)),
+        "minimum_setup_version": payload.get("minimum_setup_version", ""),
+        "updated_files": payload.get("updated_files", []),
+    }
+
+
+def build_updates_context(result: Dict[str, Any]) -> Dict[str, Any]:
+    titles = {
+        "up-to-date": "Installation is up to date",
+        "update-available": "Live update available",
+        "updated": "Live update applied",
+        "full-setup-required": "Full setup required",
+        "error": "Updater error",
+    }
+    status = result.get("status", "error")
+    return {
+        "update": {
+            **result,
+            "status": status,
+            "title": titles.get(status, "Updater status"),
+            "can_apply": status == "update-available",
+        },
+        "auth_mode": AUTH_MODE,
+        "update_password_enabled": bool(UPDATE_UI_PASSWORD),
+    }
 
 
 @app.get("/health", response_model=HealthResponse)
@@ -243,6 +325,52 @@ def chat_page(request: Request):
             "model_names": models_context["model_names"],
             "models_error": models_context["models_error"],
         },
+    )
+
+
+@app.get("/updates", response_class=HTMLResponse)
+def updates_page(request: Request):
+    context = build_updates_context(run_updater("status"))
+    return templates.TemplateResponse(
+        request=request,
+        name="updates.html",
+        context=context,
+    )
+
+
+@app.post("/updates/apply", response_class=HTMLResponse)
+def apply_updates(request: Request, update_password: str = Form("")):
+    status_result = run_updater("status")
+
+    if not UPDATE_UI_PASSWORD:
+        status_result["status"] = "error"
+        status_result["message"] = (
+            "Live update is locked because UPDATE_UI_PASSWORD is not configured in the installation .env file."
+        )
+        context = build_updates_context(status_result)
+        return templates.TemplateResponse(
+            request=request,
+            name="updates.html",
+            context=context,
+            status_code=503,
+        )
+
+    if not secrets.compare_digest(update_password, UPDATE_UI_PASSWORD):
+        status_result["status"] = "error"
+        status_result["message"] = "The update password was not accepted."
+        context = build_updates_context(status_result)
+        return templates.TemplateResponse(
+            request=request,
+            name="updates.html",
+            context=context,
+            status_code=403,
+        )
+
+    context = build_updates_context(run_updater("apply"))
+    return templates.TemplateResponse(
+        request=request,
+        name="updates.html",
+        context=context,
     )
 
 

@@ -26,9 +26,11 @@ mask_token() {
 EXISTING_GITHUB_TOKEN="$(get_saved_env_value "GITHUB_TOKEN" || true)"
 EXISTING_GITHUB_USERNAME="$(get_saved_env_value "GITHUB_USERNAME" || true)"
 EXISTING_AIUSER_PASSWORD="$(get_saved_env_value "AIUSER_PASSWORD" || true)"
+EXISTING_UPDATE_UI_PASSWORD="$(get_saved_env_value "UPDATE_UI_PASSWORD" || true)"
 GITHUB_TOKEN="$EXISTING_GITHUB_TOKEN"
 GITHUB_USERNAME="$EXISTING_GITHUB_USERNAME"
 AIUSER_PASSWORD="$EXISTING_AIUSER_PASSWORD"
+UPDATE_UI_PASSWORD="$EXISTING_UPDATE_UI_PASSWORD"
 
 NEEDS_GITHUB_TOKEN_PROMPT=true
 NEEDS_GITHUB_USERNAME_PROMPT=true
@@ -55,6 +57,14 @@ if [ -n "$EXISTING_AIUSER_PASSWORD" ]; then
     print_step "A saved login password for $AI_USER was found in the existing secrets."
 fi
 
+if [ -n "$EXISTING_UPDATE_UI_PASSWORD" ]; then
+    print_step "A saved web update password was found and will be kept unless you change it now."
+    prompt_yes_no "Set the web update password again? (y/n) " REPLY
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        UPDATE_UI_PASSWORD=""
+    fi
+fi
+
 if [ "$NEEDS_GITHUB_TOKEN_PROMPT" = true ]; then
     echo ""
     echo "To interact with GitHub, you need a Personal Access Token (PAT)."
@@ -78,9 +88,17 @@ if [ "$NEEDS_GITHUB_USERNAME_PROMPT" = true ]; then
     prompt_input "Enter your GitHub username: " GITHUB_USERNAME
 fi
 
+if [ -z "$UPDATE_UI_PASSWORD" ]; then
+    echo ""
+    echo "The web updater can be protected with a dedicated password."
+    echo "This password is only for approving browser-triggered live updates."
+    echo "It should be different from your Linux user password."
+    prompt_secret "Enter the web update password: " UPDATE_UI_PASSWORD
+fi
+
 # Validate token (basic check)
-if [ -z "$GITHUB_TOKEN" ] || [ -z "$GITHUB_USERNAME" ]; then
-    die 1 "Token and username are required" "Run this script again and provide both values"
+if [ -z "$GITHUB_TOKEN" ] || [ -z "$GITHUB_USERNAME" ] || [ -z "$UPDATE_UI_PASSWORD" ]; then
+    die 1 "Token, username, and web update password are required" "Run this script again and provide all values"
 fi
 
 # Create .env file
@@ -95,6 +113,7 @@ GITHUB_USERNAME=$GITHUB_USERNAME
 
 # Local Linux User
 AIUSER_PASSWORD=$AIUSER_PASSWORD
+UPDATE_UI_PASSWORD=$UPDATE_UI_PASSWORD
 
 # LLM Configuration
 OLLAMA_URL=http://ollama:11434
@@ -114,4 +133,5 @@ echo ""
 print_step "Secrets configured successfully"
 echo "✓ Token stored securely in $ENV_FILE"
 echo "✓ Saved login password state for $AI_USER stored in $ENV_FILE"
+echo "✓ Web update password stored in $ENV_FILE"
 echo "✓ Permissions set to 600 (readable only by $AI_USER)"

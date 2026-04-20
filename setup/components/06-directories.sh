@@ -17,6 +17,8 @@ DIRECTORIES=(
     "$DOCKER_DIR"
     "$AGENT_DIR"
     "$INSTALL_ROOT/api"
+    "$INSTALL_ROOT/program-files"
+    "$INSTALL_ROOT/program-files/updater"
     "$INSTALL_ROOT/shared"
     "$INSTALL_ROOT/www"
     "$INSTALL_SETUP_DIR"
@@ -65,6 +67,14 @@ if [ -d "$PROJECT_ROOT/shared" ]; then
     echo "  ✓ Copied shared files"
 fi
 
+# Copy program files
+if [ -d "$PROJECT_ROOT/program-files" ]; then
+    sudo cp -r "$PROJECT_ROOT/program-files/"* "$INSTALL_ROOT/program-files/"
+    sudo find "$INSTALL_ROOT/program-files" -type f -name "*.sh" -exec chmod +x {} \;
+    sudo chown -R "$AI_USER:$AI_USER" "$INSTALL_ROOT/program-files"
+    echo "  ✓ Copied program files"
+fi
+
 # Copy web UI files
 if [ -d "$PROJECT_ROOT/www" ]; then
     sudo cp -r "$PROJECT_ROOT/www/"* "$INSTALL_ROOT/www/"
@@ -111,6 +121,7 @@ echo "  $INSTALL_ROOT/"
 echo "  ├── docker/          - Docker compose and container files"
 echo "  ├── agent/           - AI agent Python code"
 echo "  ├── api/             - FastAPI gateway code"
+echo "  ├── program-files/   - Live-update assets and updater scripts"
 echo "  ├── shared/          - Shared Python helpers"
 echo "  ├── www/             - Web UI assets"
 echo "  ├── setup/           - Setup and recovery scripts"

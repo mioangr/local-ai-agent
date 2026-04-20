@@ -138,6 +138,7 @@ services:
     volumes:
       - ../settings/repos:/settings/repos:ro
       - ../api:/app/api
+      - ../program-files:/app/program-files
       - ../shared:/app/shared
       - ../www:/app/www
       - ../logs:/app/logs

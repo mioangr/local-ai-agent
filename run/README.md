@@ -20,6 +20,12 @@ The local web UI and REST API are exposed through the API gateway:
 cd /home/aiuser/local-ai-agent/docker && docker compose ps api-gateway
 ```
 
+If you change `UPDATE_UI_PASSWORD` in `/home/aiuser/local-ai-agent/.env`, restart only the API gateway:
+```bash
+cd /home/aiuser/local-ai-agent/docker
+docker compose up -d --force-recreate api-gateway
+```
+
 Setup and recovery scripts now live under `setup/` on the VM host:
 ```bash
 cd /home/aiuser/local-ai-agent/setup
@@ -44,6 +50,11 @@ The script will:
 Open the dashboard on your LAN:
 ```bash
 http://<vm-ip>:8000
+```
+
+The update page is available at:
+```bash
+http://<vm-ip>:8000/updates
 ```
 
 List projects:
