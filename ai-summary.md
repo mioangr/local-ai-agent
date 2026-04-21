@@ -402,7 +402,7 @@ Main subfolders:
 
 - `agent/`
 - `api/`
-- `run/`
+- `cli/`
 - `shared/`
 - `updater/`
 - `www/`
@@ -439,9 +439,9 @@ Main files:
 - `repos.py`
 - `tasks.py`
 
-### `runtime/run/`
+### `runtime/cli/`
 
-Daily runtime tools.
+Command-line entrypoints for interacting with the running system.
 
 Main file:
 

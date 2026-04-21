@@ -109,5 +109,5 @@ echo "4. Services will auto-start after reboot via Docker (system service), not 
 echo ""
 echo "For more information, see:"
 echo "  - runtime/agent/README.md - How the agent works"
-echo "  - runtime/run/README.md - Runtime commands"
+echo "  - runtime/cli/README.md - CLI commands"
 echo "  - setup/docker/README.md - Container management"

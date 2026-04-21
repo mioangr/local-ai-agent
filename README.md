@@ -128,7 +128,7 @@ local-ai-agent/                        # Subfolder where everything is installed
 │   ├── README.md                      # Runtime folder documentation
 │   ├── agent/                         # Agent code. Read more in folder runtime/agent
 │   ├── api/                           # FastAPI gateway code. Read more in folder runtime/api
-│   ├── run/                           # Daily runtime scripts. Read more in folder runtime/run
+│   ├── cli/                           # Command-line entrypoints. Read more in folder runtime/cli
 │   ├── shared/                        # Shared Python helpers. Read more in folder runtime/shared
 │   ├── updater/                       # Live update manifest and updater script
 │   └── www/                           # Rendered browser pages and shared styles
@@ -161,7 +161,7 @@ local-ai-agent/                        # Subfolder where everything is installed
 2. Send commands with project name:
 
    ```bash
-   ./runtime/run/send_task.py --project my-web-app --instruction "Add error handling to login function"
+   ./runtime/cli/send_task.py --project my-web-app --instruction "Add error handling to login function"
 
 3. Agent automatically:
 
