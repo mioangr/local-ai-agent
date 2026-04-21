@@ -8,7 +8,7 @@ Purpose: Listens for tasks from Redis queue and executes them using LangGraph
          and creating GitHub Pull Requests.
 
 Usage: 
-    - Run standalone: python langgraph_agent.py
+    - Run standalone: python runtime/agent/langgraph_agent.py
     - Run via Docker: docker compose up langgraph-agent
 
 Task format (Redis list "task:queue"):
@@ -33,11 +33,11 @@ from github import Github, GithubException, Repository
 from langchain_community.llms import Ollama
 from langgraph.graph import StateGraph, END
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from shared.repos import get_repository_map
-from shared.logging_utils import APP_LOG_FILE, ensure_log_dir
-from shared.tasks import ERROR_CHANNEL, QUEUE_NAME, RESULT_CHANNEL, update_task
+from runtime.shared.repos import get_repository_map
+from runtime.shared.logging_utils import APP_LOG_FILE, ensure_log_dir
+from runtime.shared.tasks import ERROR_CHANNEL, QUEUE_NAME, RESULT_CHANNEL, update_task
 
 # =============================================================================
 # Configuration (from environment variables)

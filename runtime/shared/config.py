@@ -5,7 +5,8 @@ from pathlib import Path
 from typing import Dict
 
 
-ROOT_DIR = Path(__file__).resolve().parent.parent
+INSTALL_ROOT = Path(__file__).resolve().parents[2]
+ROOT_DIR = INSTALL_ROOT
 
 
 def load_install_config() -> Dict[str, str]:

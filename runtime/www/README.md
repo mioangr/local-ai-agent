@@ -2,7 +2,7 @@
 
 This folder contains the rendered HTML pages served by the API gateway.
 
-Its purpose is to keep the web-facing pages in a dedicated top-level folder instead of mixing them with Python modules.
+Its purpose is to keep the web-facing pages in a dedicated runtime subfolder instead of mixing them with Python modules.
 
 ## Files
 

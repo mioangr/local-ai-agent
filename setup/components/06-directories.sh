@@ -15,14 +15,14 @@ print_header "Creating Directory Structure"
 DIRECTORIES=(
     "$INSTALL_ROOT"
     "$DOCKER_DIR"
-    "$AGENT_DIR"
-    "$INSTALL_ROOT/api"
-    "$INSTALL_ROOT/program-files"
-    "$INSTALL_ROOT/program-files/updater"
-    "$INSTALL_ROOT/shared"
-    "$INSTALL_ROOT/www"
+    "$RUNTIME_DIR"
+    "$RUNTIME_AGENT_DIR"
+    "$RUNTIME_API_DIR"
+    "$RUNTIME_RUN_DIR"
+    "$RUNTIME_SHARED_DIR"
+    "$RUNTIME_UPDATER_DIR"
+    "$RUNTIME_WWW_DIR"
     "$INSTALL_SETUP_DIR"
-    "$RUN_DIR"
     "$REPOS_DIR"
     "$LOGS_DIR"
     "$WORKSPACE_DIR"
@@ -46,40 +46,12 @@ if [ -d "$PROJECT_ROOT/setup/docker" ]; then
     echo "  ✓ Copied docker files"
 fi
 
-# Copy agent files
-if [ -d "$PROJECT_ROOT/agent" ]; then
-    sudo cp -r "$PROJECT_ROOT/agent/"* "$AGENT_DIR/"
-    sudo chown -R "$AI_USER:$AI_USER" "$AGENT_DIR"
-    echo "  ✓ Copied agent files"
-fi
-
-# Copy API files
-if [ -d "$PROJECT_ROOT/api" ]; then
-    sudo cp -r "$PROJECT_ROOT/api/"* "$INSTALL_ROOT/api/"
-    sudo chown -R "$AI_USER:$AI_USER" "$INSTALL_ROOT/api"
-    echo "  ✓ Copied API files"
-fi
-
-# Copy shared files
-if [ -d "$PROJECT_ROOT/shared" ]; then
-    sudo cp -r "$PROJECT_ROOT/shared/"* "$INSTALL_ROOT/shared/"
-    sudo chown -R "$AI_USER:$AI_USER" "$INSTALL_ROOT/shared"
-    echo "  ✓ Copied shared files"
-fi
-
-# Copy program files
-if [ -d "$PROJECT_ROOT/program-files" ]; then
-    sudo cp -r "$PROJECT_ROOT/program-files/"* "$INSTALL_ROOT/program-files/"
-    sudo find "$INSTALL_ROOT/program-files" -type f -name "*.sh" -exec chmod +x {} \;
-    sudo chown -R "$AI_USER:$AI_USER" "$INSTALL_ROOT/program-files"
-    echo "  ✓ Copied program files"
-fi
-
-# Copy web UI files
-if [ -d "$PROJECT_ROOT/www" ]; then
-    sudo cp -r "$PROJECT_ROOT/www/"* "$INSTALL_ROOT/www/"
-    sudo chown -R "$AI_USER:$AI_USER" "$INSTALL_ROOT/www"
-    echo "  ✓ Copied web UI files"
+# Copy runtime files
+if [ -d "$PROJECT_ROOT/runtime" ]; then
+    sudo cp -r "$PROJECT_ROOT/runtime/"* "$RUNTIME_DIR/"
+    sudo find "$RUNTIME_DIR" -type f -name "*.sh" -exec chmod +x {} \;
+    sudo chown -R "$AI_USER:$AI_USER" "$RUNTIME_DIR"
+    echo "  ✓ Copied runtime files"
 fi
 
 # Copy setup files
@@ -89,15 +61,6 @@ if [ -d "$PROJECT_ROOT/setup" ]; then
     sudo chmod +x "$INSTALL_SETUP_DIR/components/"*.sh 2>/dev/null || true
     sudo chown -R "$AI_USER:$AI_USER" "$INSTALL_SETUP_DIR"
     echo "  ✓ Copied setup and recovery scripts"
-fi
-
-# Copy runtime scripts
-if [ -d "$PROJECT_ROOT/run" ]; then
-    sudo cp -r "$PROJECT_ROOT/run/"* "$RUN_DIR/"
-    sudo chmod +x "$RUN_DIR/"*.py 2>/dev/null || true
-    sudo chmod +x "$RUN_DIR/"*.sh 2>/dev/null || true
-    sudo chown -R "$AI_USER:$AI_USER" "$RUN_DIR"
-    echo "  ✓ Copied runtime scripts"
 fi
 
 # Copy settings/repos template
@@ -119,13 +82,8 @@ echo ""
 echo "Directory layout:"
 echo "  $INSTALL_ROOT/"
 echo "  ├── docker/          - Docker compose and container files"
-echo "  ├── agent/           - AI agent Python code"
-echo "  ├── api/             - FastAPI gateway code"
-echo "  ├── program-files/   - Live-update assets and updater scripts"
-echo "  ├── shared/          - Shared Python helpers"
-echo "  ├── www/             - Web UI assets"
+echo "  ├── runtime/         - Updater-managed application files used while the system runs"
 echo "  ├── setup/           - Setup and recovery scripts"
-echo "  ├── run/             - Daily runtime scripts (send_task, etc.)"
 echo "  ├── settings/repos/  - Repository configurations"
 echo "  ├── logs/            - Runtime logs"
 echo "  ├── workspace/       - Temporary clones of repositories"

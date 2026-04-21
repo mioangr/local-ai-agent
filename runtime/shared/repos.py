@@ -6,7 +6,7 @@ import os
 from pathlib import Path
 from typing import Dict, List
 
-from shared.config import load_install_config
+from runtime.shared.config import load_install_config
 
 
 INSTALL_CONFIG = load_install_config()
@@ -36,4 +36,3 @@ def list_repositories() -> List[Dict[str, str]]:
 
 def get_repository_map() -> Dict[str, Dict[str, str]]:
     return {repo["name"]: repo for repo in list_repositories()}
-

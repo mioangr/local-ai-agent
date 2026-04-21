@@ -3,8 +3,8 @@
 
 from typing import Optional
 
-from api.services.redis_client import get_redis_client
-from shared.tasks import create_task_payload, get_task, list_tasks, submit_task
+from runtime.api.services.redis_client import get_redis_client
+from runtime.shared.tasks import create_task_payload, get_task, list_tasks, submit_task
 
 
 def create_and_submit_task(project: str, instruction: str, model: Optional[str], submitted_by: str):
@@ -25,4 +25,3 @@ def get_task_by_id(task_id: str):
 
 def get_recent_tasks(limit: int = 20):
     return list_tasks(get_redis_client(), limit=limit)
-

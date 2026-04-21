@@ -97,10 +97,9 @@ services:
       - ../logs:/app/logs # Agent logs (mounted from host)
       - ../settings/repos:/settings/repos:ro # Repository configs (read-only)
       - ../.env:/app/.env:ro # Secrets (read-only)
-      - ../agent:/app/agent # Agent code (for development)
-      - ../shared:/app/shared # Shared task/config helpers
+      - ../runtime:/app/runtime # Runtime code and updater-managed assets
     working_dir: /app
-    command: python -u agent/langgraph_agent.py
+    command: python -u runtime/agent/langgraph_agent.py
     deploy:
       resources:
         limits:
@@ -137,13 +136,10 @@ services:
       - AUTH_MODE=anonymous
     volumes:
       - ../settings/repos:/settings/repos:ro
-      - ../api:/app/api
-      - ../program-files:/app/program-files
-      - ../shared:/app/shared
-      - ../www:/app/www
+      - ../runtime:/app/runtime
       - ../logs:/app/logs
     working_dir: /app
-    command: uvicorn api.main:app --host 0.0.0.0 --port 8000
+    command: uvicorn runtime.api.main:app --host 0.0.0.0 --port 8000
     ports:
       - "8000:8000"
     deploy:

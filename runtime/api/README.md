@@ -16,7 +16,7 @@ Its purpose is to provide:
 | `__init__.py` | Marks the folder as a Python package. |
 | `routes/` | Reserved for route modules as the API grows. |
 | `services/` | Small service helpers used by the API layer. |
-| `templates/` | Legacy template location kept for compatibility during the transition to the repo-root `www/` folder. |
+| `templates/` | Legacy placeholder kept after moving rendered pages to `runtime/www/`. |
 
-Read more in folder `api/services`.
-Read more in folder `api/routes`.
+Read more in folder `runtime/api/services`.
+Read more in folder `runtime/api/routes`.

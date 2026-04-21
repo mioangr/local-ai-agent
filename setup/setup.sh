@@ -108,6 +108,6 @@ echo "3. Send a test task from CLI: $RUN_DIR/send_task.py --project my-project -
 echo "4. Services will auto-start after reboot via Docker (system service), not via an aiuser login shell"
 echo ""
 echo "For more information, see:"
-echo "  - agent/README.md - How the agent works"
-echo "  - run/README.md - Runtime commands"
+echo "  - runtime/agent/README.md - How the agent works"
+echo "  - runtime/run/README.md - Runtime commands"
 echo "  - setup/docker/README.md - Container management"

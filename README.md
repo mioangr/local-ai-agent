@@ -102,8 +102,6 @@ local-ai-agent/                        # Subfolder where everything is installed
 ├── README.md                          # Main project documentation (updated)
 ├── 0-Prerequisites/                   # Pre-install VM preparation assets. Read more in folder 0-Prerequisites
 ├── install.conf                       # Shared install configuration
-├── api/                               # FastAPI gateway code. Read more in folder api
-├── shared/                            # Shared Python helpers. Read more in folder shared
 ├── setup/                             # Setup, recovery, and installer files
 │   ├── setup.sh                       # Umbrella setup script
 │   ├── common.sh                      # Shared setup helpers
@@ -126,18 +124,18 @@ local-ai-agent/                        # Subfolder where everything is installed
 │       ├── docker-compose.yml         # Main compose file
 │       ├── Dockerfile.agent           # Agent container build
 │       └── requirements.txt           # Python dependencies
-├── run/                               # Daily runtime scripts. Read more in folder run
-│   ├── README.md                      # Runtime script documentation
-│   └── send_task.py                   # Send task to agent
+├── runtime/                           # Updater-managed application payload
+│   ├── README.md                      # Runtime folder documentation
+│   ├── agent/                         # Agent code. Read more in folder runtime/agent
+│   ├── api/                           # FastAPI gateway code. Read more in folder runtime/api
+│   ├── run/                           # Daily runtime scripts. Read more in folder runtime/run
+│   ├── shared/                        # Shared Python helpers. Read more in folder runtime/shared
+│   ├── updater/                       # Live update manifest and updater script
+│   └── www/                           # Rendered browser pages and shared styles
 ├── settings/                          # Editable runtime settings. Read more in folder settings
 │   └── repos/                         # Repository configurations. Read more in folder settings/repos
 │       ├── README.md                  # Documentation for repo configs
 │       └── repos.json                 # List of managed repositories
-├── agent/                             # Agent code. Read more in folder agent
-│   ├── README.md                      # Agent documentation
-│   ├── langgraph_agent.py             # Main agent script
-│   └── repo_manager.py                # Repository management utilities
-├── www/                               # Rendered web pages and forms. Read more in folder www
 └── logs/                              # Log files (created at runtime)
 ```
 
@@ -163,7 +161,7 @@ local-ai-agent/                        # Subfolder where everything is installed
 2. Send commands with project name:
 
    ```bash
-   ./run/send_task.py --project my-web-app --instruction "Add error handling to login function"
+   ./runtime/run/send_task.py --project my-web-app --instruction "Add error handling to login function"
 
 3. Agent automatically:
 
@@ -246,7 +244,9 @@ Web pages after setup:
 
 ### Browser-Based Live Updates
 
-The installation can expose a browser-based updater for files that are declared safe for live replacement. The updater checks the installed version against the online manifest and can block releases that require a full setup rerun.
+The installation can expose a browser-based updater for files that are declared safe for live replacement. In practice, these are the installed assets kept under `runtime/`, which the updater can replace from a newer manifest without rerunning the full setup. The updater checks the installed version against the online manifest and can block releases that require a full setup rerun.
+
+The current `runtime/` reorganization is one of those structural changes, so this release is marked as requiring a full setup before later live updates can continue from the new layout.
 
 To allow a user to apply a live update from the browser, set a dedicated updater password in the installed `.env` file:
 

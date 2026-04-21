@@ -5,7 +5,7 @@ import logging
 import os
 from pathlib import Path
 
-from shared.config import ROOT_DIR
+from runtime.shared.config import ROOT_DIR
 
 
 APP_LOG_FILE = Path(os.getenv("APP_LOG_FILE", str(ROOT_DIR / "logs" / "activity.log")))

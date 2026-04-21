@@ -107,7 +107,7 @@ Purpose:
 
 Template file:
 
-- `www/index.html`
+- `runtime/www/index.html`
 
 #### `/chat`
 
@@ -121,7 +121,7 @@ Purpose:
 
 Template file:
 
-- `www/chat.html`
+- `runtime/www/chat.html`
 
 #### `/tasks/<task_id>`
 
@@ -136,7 +136,21 @@ Purpose:
 
 Template file:
 
-- `www/task_detail.html`
+- `runtime/www/task_detail.html`
+
+#### `/updates`
+
+Browser-based live update page.
+
+Purpose:
+
+- check whether a live update is available
+- show whether a release requires full setup instead of live replacement
+- apply allowed updater-managed file replacements after password confirmation
+
+Template file:
+
+- `runtime/www/updates.html`
 
 #### `/status`
 
@@ -150,13 +164,13 @@ Purpose:
 
 Template file:
 
-- `www/status.html`
+- `runtime/www/status.html`
 
 ### Shared CSS
 
 Common web styling is in:
 
-- `www/common.css`
+- `runtime/www/common.css`
 
 ## Current REST API
 
@@ -175,6 +189,44 @@ Common web styling is in:
 ### Direct Chat
 
 - `POST /api/chat`
+
+## Live Update System
+
+### Purpose
+
+The live updater is meant for safe in-place replacement of selected installed files without rerunning the full setup.
+
+### Managed Install Assets
+
+Updater-managed runtime assets now live under:
+
+- `runtime/`
+
+This currently includes:
+
+- `runtime/updater/` for the updater script and manifest
+- `runtime/www/` for browser pages and shared web assets
+
+### Update Decision Model
+
+The updater:
+
+- compares the installed manifest with the remote manifest
+- reports whether a live update is available
+- blocks live replacement when the release requires a full setup rerun
+- can bootstrap a newer updater script before applying the rest of the update
+
+### Update Scope
+
+The remote manifest declares which files may be replaced live through:
+
+- `live_update_files`
+
+Only files listed there are downloaded and installed during a live update.
+
+### Current Migration Note
+
+The move to `runtime/` changes the installed layout, so this release should be treated as a full-setup migration rather than a normal live replacement.
 
 ## Task Data Model
 
@@ -326,15 +378,12 @@ Main runtime definition:
 - `../logs:/app/logs`
 - `../settings/repos:/settings/repos:ro`
 - `../.env:/app/.env:ro`
-- `../agent:/app/agent`
-- `../shared:/app/shared`
+- `../runtime:/app/runtime`
 
 #### API
 
 - `../settings/repos:/settings/repos:ro`
-- `../api:/app/api`
-- `../shared:/app/shared`
-- `../www:/app/www`
+- `../runtime:/app/runtime`
 - `../logs:/app/logs`
 
 ### Shared Image
@@ -345,7 +394,20 @@ The agent and API currently share the same Docker build:
 
 ## Key Source Folders
 
-### `agent/`
+### `runtime/`
+
+Updater-managed application payload used while the installed system runs.
+
+Main subfolders:
+
+- `agent/`
+- `api/`
+- `run/`
+- `shared/`
+- `updater/`
+- `www/`
+
+### `runtime/agent/`
 
 Core worker code.
 
@@ -354,7 +416,7 @@ Main files:
 - `langgraph_agent.py`
 - `repo_manager.py`
 
-### `api/`
+### `runtime/api/`
 
 FastAPI gateway.
 
@@ -366,7 +428,7 @@ Main files:
 - `services/tasks.py`
 - `services/ollama.py`
 
-### `shared/`
+### `runtime/shared/`
 
 Shared Python helpers reused across agent, CLI, and API.
 
@@ -377,7 +439,7 @@ Main files:
 - `repos.py`
 - `tasks.py`
 
-### `run/`
+### `runtime/run/`
 
 Daily runtime tools.
 
@@ -389,7 +451,11 @@ Main file:
 
 Installer, doctor, reset, and Docker setup assets.
 
-### `www/`
+### `runtime/updater/`
+
+Updater script and release manifest used for safe live replacement.
+
+### `runtime/www/`
 
 Rendered browser pages and shared stylesheet.
 

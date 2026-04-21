@@ -15,12 +15,12 @@ from pathlib import Path
 
 import redis
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from shared.config import load_install_config
-from shared.logging_utils import configure_file_logger
-from shared.repos import get_repository_map
-from shared.tasks import create_task_payload, get_task, submit_task
+from runtime.shared.config import load_install_config
+from runtime.shared.logging_utils import configure_file_logger
+from runtime.shared.repos import get_repository_map
+from runtime.shared.tasks import create_task_payload, get_task, submit_task
 
 
 INSTALL_CONFIG = load_install_config()

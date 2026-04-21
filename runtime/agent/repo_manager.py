@@ -13,29 +13,15 @@ Usage:
 ================================================================================
 """
 
+import argparse
 import json
 import os
 import sys
-import argparse
 from typing import Dict, List
 
-def load_install_config() -> Dict[str, str]:
-    values: Dict[str, str] = {}
-    config_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "install.conf")
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
-    if not os.path.exists(config_path):
-        return values
-
-    with open(config_path, "r", encoding="utf-8") as f:
-        for raw_line in f:
-            line = raw_line.strip()
-            if not line or line.startswith("#") or "=" not in line:
-                continue
-
-            key, value = line.split("=", 1)
-            values[key.strip()] = value.strip().strip("'\"")
-
-    return values
+from runtime.shared.config import load_install_config
 
 INSTALL_CONFIG = load_install_config()
 AI_USER = INSTALL_CONFIG.get("AI_USER", "aiuser")

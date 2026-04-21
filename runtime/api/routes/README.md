@@ -2,7 +2,7 @@
 
 This folder is reserved for route modules for the FastAPI gateway.
 
-At the moment most route handlers still live directly in `api/main.py`, but this folder exists so route files can be split out later without changing the package layout.
+At the moment most route handlers still live directly in `runtime/api/main.py`, but this folder exists so route files can be split out later without changing the package layout.
 
 ## Files
 

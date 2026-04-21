@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """FastAPI gateway for the local AI agent."""
 
+import secrets
 import json
 import os
 import subprocess
 import sys
-import secrets
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -16,30 +16,31 @@ from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel, Field
 import requests
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from api.services.redis_client import get_redis_client
-from api.services.ollama import chat_with_model, list_installed_models
-from api.services.repositories import get_all_projects, get_project_map
-from api.services.tasks import create_and_submit_task, get_recent_tasks, get_task_by_id
-from shared.logging_utils import APP_LOG_FILE, configure_file_logger, ensure_log_dir
+from runtime.api.services.redis_client import get_redis_client
+from runtime.api.services.ollama import chat_with_model, list_installed_models
+from runtime.api.services.repositories import get_all_projects, get_project_map
+from runtime.api.services.tasks import create_and_submit_task, get_recent_tasks, get_task_by_id
+from runtime.shared.logging_utils import APP_LOG_FILE, configure_file_logger, ensure_log_dir
 
 
 APP_TITLE = "Local AI Agent Gateway"
 APP_VERSION = "0.1.0"
 AUTH_MODE = os.getenv("AUTH_MODE", "anonymous")
-UPDATER_SCRIPT = Path(__file__).resolve().parent.parent / "program-files" / "updater" / "updater.sh"
+RUNTIME_DIR = Path(__file__).resolve().parent.parent
+WWW_DIR = RUNTIME_DIR / "www"
+UPDATER_SCRIPT = RUNTIME_DIR / "updater" / "updater.sh"
 UPDATE_UI_PASSWORD = os.getenv("UPDATE_UI_PASSWORD", "")
 
 app = FastAPI(title=APP_TITLE, version=APP_VERSION)
-templates = Jinja2Templates(directory=str(Path(__file__).resolve().parent.parent / "www"))
+templates = Jinja2Templates(directory=str(WWW_DIR))
 static_dir = Path(__file__).resolve().parent / "static"
-www_dir = Path(__file__).resolve().parent.parent / "www"
 app_logger = configure_file_logger("api-gateway")
 
 if static_dir.exists():
     app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
-app.mount("/www", StaticFiles(directory=str(www_dir)), name="www")
+app.mount("/www", StaticFiles(directory=str(WWW_DIR)), name="www")
 
 
 class TaskCreateRequest(BaseModel):

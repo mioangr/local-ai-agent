@@ -30,11 +30,8 @@ WORKDIR /app
 COPY docker/requirements.txt ./requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy agent code (mounted as volume in development, but copied for production)
-COPY agent/ ./agent/
-COPY api/ ./api/
-COPY shared/ ./shared/
-COPY www/ ./www/
+# Copy runtime application files (mounted as a volume in development, but copied for production)
+COPY runtime/ ./runtime/
 COPY settings/repos/ ./settings/repos/
 
 # Create necessary directories
@@ -45,4 +42,4 @@ RUN git config --global user.email "ai-agent@local.local" && \
     git config --global user.name "AI Agent"
 
 # Set default command
-CMD ["python", "-u", "agent/langgraph_agent.py"]
+CMD ["python", "-u", "runtime/agent/langgraph_agent.py"]
