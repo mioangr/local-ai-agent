@@ -44,11 +44,30 @@
     .topline {
       margin-bottom: 20px;
     }
+    .site-nav__badge {
+      background: rgba(154, 52, 18, 0.12);
+      color: var(--accent);
+    }
+    .site-nav__link {
+      color: var(--accent);
+    }
+    .site-nav__link.is-active {
+      background: rgba(154, 52, 18, 0.12);
+      border-color: rgba(154, 52, 18, 0.18);
+    }
   </style>
 </head>
 <body>
   <main class="detail-layout">
     <section class="panel">
+      <div class="site-nav">
+        <span class="site-nav__badge">Auth mode: {{ auth_mode }}</span>
+        <a class="site-nav__link" href="/">Home</a>
+        <a class="site-nav__link" href="/chat">AI Chat</a>
+        <a class="site-nav__link" href="/status">System Status</a>
+        <a class="site-nav__link" href="/updates">Check for updates</a>
+        <a class="site-nav__link" href="/repos">Manage Repos</a>
+      </div>
       <div class="topline">
         <h1>Task {{ task.task_id }}</h1>
         <a href="/">Back to dashboard</a>

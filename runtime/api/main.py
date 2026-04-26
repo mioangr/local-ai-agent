@@ -417,6 +417,7 @@ def repos_page(request: Request):
 
 @app.post("/repos", response_class=HTMLResponse)
 def manage_repos(
+    request: Request,
     action: str = Form(...),
     name: str = Form(...),
     url: str = Form(""),

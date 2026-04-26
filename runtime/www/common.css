@@ -31,6 +31,35 @@ main {
   margin: 32px auto 48px;
 }
 
+.site-nav {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.site-nav__badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.site-nav__link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 38px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+}
+
+.site-nav__link.is-active {
+  font-weight: 700;
+}
+
 .panel {
   border-radius: 20px;
   padding: 24px;

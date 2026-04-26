@@ -98,6 +98,24 @@
       flex-wrap: wrap;
       margin-bottom: 16px;
     }
+    .status-shell {
+      width: min(1100px, calc(100% - 32px));
+      margin: 32px auto 48px;
+    }
+    .status-shell .site-nav {
+      margin-bottom: 24px;
+    }
+    .site-nav__badge {
+      background: rgba(20, 83, 45, 0.12);
+      color: var(--accent-2);
+    }
+    .site-nav__link {
+      color: var(--accent-2);
+    }
+    .site-nav__link.is-active {
+      background: rgba(20, 83, 45, 0.12);
+      border-color: rgba(20, 83, 45, 0.2);
+    }
     h1 {
       margin: 0;
     }
@@ -109,16 +127,23 @@
   </style>
 </head>
 <body>
-  <main class="status-layout">
-    <section class="panel">
+  <div class="status-shell">
+    <div class="site-nav">
+      <span class="site-nav__badge">Auth mode: {{ auth_mode }}</span>
+      <a class="site-nav__link" href="/">Home</a>
+      <a class="site-nav__link" href="/chat">AI Chat</a>
+      <a class="site-nav__link is-active" href="/status">System Status</a>
+      <a class="site-nav__link" href="/updates">Check for updates</a>
+      <a class="site-nav__link" href="/repos">Manage Repos</a>
+    </div>
+    <main class="status-layout">
+      <section class="panel">
       <div class="topline">
         <div>
           <h1>System Status</h1>
           <p>Current shared activity log. This page is intended to show setup and runtime messages in one place.</p>
         </div>
         <div class="actions">
-          <a class="button" href="/">Back to dashboard</a>
-          <a class="button" href="/repos">Manage Repos</a>
           <form action="/status/clear" method="post">
             <button type="submit">Clear Logs</button>
           </form>
@@ -129,8 +154,8 @@
         <span>Lines shown: {{ line_count }}</span>
       </div>
       <div class="logpanel" id="logpanel">{{ log_text }}</div>
-    </section>
-    <section class="panel models-panel">
+      </section>
+      <section class="panel models-panel">
       <h2>Installed AI Models</h2>
       <p>The API gateway reads this list from Ollama so the task form and chat form can offer the installed models directly.</p>
       {% if models %}
@@ -155,8 +180,9 @@
       {% else %}
       <div class="models-error">No installed models were found.</div>
       {% endif %}
-    </section>
-  </main>
+      </section>
+    </main>
+  </div>
   <script>
     const panel = document.getElementById("logpanel");
     panel.scrollTop = panel.scrollHeight;

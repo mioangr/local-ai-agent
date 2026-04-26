@@ -30,27 +30,23 @@
       border: 1px solid var(--border);
       box-shadow: 0 18px 50px rgba(26, 37, 48, 0.08);
     }
-    .nav {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      margin-bottom: 18px;
-    }
-    .pill {
-      display: inline-block;
-      padding: 4px 8px;
-      border-radius: 999px;
-      background: var(--accent-soft);
-      color: var(--accent);
-      font-size: 0.82rem;
-      font-weight: 700;
-    }
     p,
     li {
       color: var(--muted);
     }
     a {
       color: var(--accent);
+    }
+    .site-nav__badge {
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+    .site-nav__link {
+      color: var(--accent);
+    }
+    .site-nav__link.is-active {
+      background: var(--accent-soft);
+      border-color: rgba(15, 107, 87, 0.2);
     }
     button {
       border: 1px solid var(--border);
@@ -116,12 +112,13 @@
 </head>
 <body>
   <main class="panel">
-    <div class="nav">
-      <span class="pill">Updater</span>
-      <a href="/">Task dashboard</a>
-      <a href="/chat">AI Chat</a>
-      <a href="/status">System Status</a>
-      <a href="/repos">Manage Repos</a>
+    <div class="site-nav">
+      <span class="site-nav__badge">Auth mode: {{ auth_mode }}</span>
+      <a class="site-nav__link" href="/">Home</a>
+      <a class="site-nav__link" href="/chat">AI Chat</a>
+      <a class="site-nav__link" href="/status">System Status</a>
+      <a class="site-nav__link is-active" href="/updates">Check for updates</a>
+      <a class="site-nav__link" href="/repos">Manage Repos</a>
     </div>
     <h1>Software Updates</h1>
     <p>The updater compares the installed release manifest with the latest release manifest online and only applies files declared as live-update safe.</p>
