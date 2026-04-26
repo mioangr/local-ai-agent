@@ -95,7 +95,7 @@ services:
     volumes:
       - ../workspace:/workspace # Ephemeral repo clones
       - ../logs:/app/logs # Agent logs (mounted from host)
-      - ../settings/repos:/settings/repos:ro # Repository configs (read-only)
+      - ../settings/repos:/settings/repos:rw # Repository configs (read-write)
       - ../.env:/app/.env:ro # Secrets (read-only)
       - ../runtime:/app/runtime # Runtime code and updater-managed assets
     working_dir: /app
@@ -135,7 +135,7 @@ services:
       - CONFIG_REPO_PATH=/settings/repos
       - AUTH_MODE=anonymous
     volumes:
-      - ../settings/repos:/settings/repos:ro
+      - ../settings/repos:/settings/repos:rw
       - ../runtime:/app/runtime
       - ../logs:/app/logs
     working_dir: /app
