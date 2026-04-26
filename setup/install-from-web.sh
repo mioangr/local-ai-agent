@@ -64,15 +64,16 @@ if [ -d "$INSTALL_ROOT" ]; then
     git clone https://github.com/mioangr/local-ai-agent.git "$TEMP_INSTALL_DIR"
     cd "$TEMP_INSTALL_DIR"
 
+    # Request sudo FIRST before accessing files owned by aiuser
+    echo "Requesting sudo access for cleanup and backup..."
+    sudo -v
+
     if [ -f "$INSTALL_ROOT/.env" ]; then
         BACKUP_ENV_FILE="$(mktemp)"
-        cp "$INSTALL_ROOT/.env" "$BACKUP_ENV_FILE"
-        chmod 600 "$BACKUP_ENV_FILE"
+        sudo cp "$INSTALL_ROOT/.env" "$BACKUP_ENV_FILE"
+        sudo chmod 600 "$BACKUP_ENV_FILE"
         echo "Backed up the existing secrets file so the reinstall can reuse saved values."
     fi
-
-    echo "Requesting sudo access for cleanup and setup..."
-    sudo -v
 
     echo "Running install cleanup (keeping Docker volumes)..."
     chmod +x setup/reset-install.sh
