@@ -40,7 +40,8 @@
     "runtime/www/updates.html",
     "runtime/updater/updater.sh",
     "runtime/updater/version.json",
-    "setup/docker/docker-compose.yml"
+    "setup/docker/docker-compose.yml",
+    "runtime/api/main.py"
   ],
-  "release_notes": "Fixed docker-compose.yml to allow repository configuration to be writable (changed :ro to :rw for settings/repos volume mount)."
+  "release_notes": "Fixed Internal Server Error when adding/editing repositories (incorrect response_class in POST /repos handler)."
 }
