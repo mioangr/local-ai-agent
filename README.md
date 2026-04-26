@@ -298,7 +298,7 @@ In short:
 | Script | Purpose | Usage |
 |--------|---------|-------|
 | `rm -rf temp-web-install` | remove temp installation folder |  |
-| repos.json | Edit the list of repos | `sudo nano /home/aiuser/local-ai-agent/settings/repos/repos.json`  |
+| repos.json | Manage repositories via web UI | Open http://&lt;vm-ip&gt;:8000/repos |
 | `doctor.sh` | Inspect the installation and report what is missing or unhealthy | `cd /home/aiuser/local-ai-agent/setup && ./doctor.sh` |
 | `reset-runtime.sh` | Stop containers and clear transient runtime state so you can retry the Docker/runtime steps | `cd /home/aiuser/local-ai-agent/setup && ./reset-runtime.sh` |
 | `reset-install.sh` | Remove the installed project files, and optionally the dedicated user, before reinstalling | `cd /home/aiuser/local-ai-agent/setup && ./reset-install.sh --remove-user` |

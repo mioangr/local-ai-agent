@@ -70,7 +70,12 @@ curl -X POST http://<vm-ip>:8000/api/tasks \
 ```
 
 ### Managing Repositories
-Edit the repository list manually in:
+Manage repositories via the web UI:
+```
+http://<vm-ip>:8000/repos
+```
+
+Or edit the JSON file directly:
 ```bash
 /home/aiuser/local-ai-agent/settings/repos/repos.json
 ```

@@ -398,3 +398,70 @@ def clear_status_log():
     ensure_log_dir()
     APP_LOG_FILE.write_text("", encoding="utf-8")
     return RedirectResponse(url="/status", status_code=303)
+
+
+@app.get("/repos", response_class=HTMLResponse)
+def repos_page(request: Request):
+    from runtime.shared.repos import list_repositories
+    return templates.TemplateResponse(
+        request=request,
+        name="repos.html",
+        context={
+            "repos": list_repositories(),
+            "auth_mode": AUTH_MODE,
+            "message": "",
+            "message_type": "",
+        },
+    )
+
+
+@app.post("/repos", response_class=RedirectResponse)
+def manage_repos(
+    action: str = Form(...),
+    name: str = Form(...),
+    url: str = Form(""),
+    branch: str = Form("main"),
+    original_name: str = Form(""),
+):
+    from runtime.shared.repos import add_repository, update_repository, delete_repository
+    
+    message = ""
+    message_type = "success"
+    
+    try:
+        if action == "add":
+            add_repository(name=name, url=url, branch=branch)
+            message = f"Repository '{name}' added successfully."
+        elif action == "edit":
+            update_repository(
+                original_name=original_name or name,
+                name=name,
+                url=url,
+                branch=branch
+            )
+            message = f"Repository '{name}' updated successfully."
+        elif action == "delete":
+            delete_repository(name=name)
+            message = f"Repository '{name}' deleted successfully."
+        else:
+            message = f"Unknown action: {action}"
+            message_type = "error"
+    except ValueError as exc:
+        message = str(exc)
+        message_type = "error"
+    except Exception as exc:
+        message = f"Error: {exc}"
+        message_type = "error"
+    
+    # Re-render the page with message
+    from runtime.shared.repos import list_repositories
+    return templates.TemplateResponse(
+        request=request,
+        name="repos.html",
+        context={
+            "repos": list_repositories(),
+            "auth_mode": AUTH_MODE,
+            "message": message,
+            "message_type": message_type,
+        },
+    )

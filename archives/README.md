@@ -8,8 +8,6 @@ Its purpose is to preserve experiments, previous setup assets, and older helper 
 
 | Item | Purpose |
 |------|---------|
-| `add_repo.py` | Older helper for adding repository entries. |
-| `list_repos.py` | Older helper for listing configured repositories. |
 | `remove_openclaw.sh` | Legacy cleanup script from an earlier naming/version of the project. |
 | `setup_openclaw.sh` | Legacy setup script from an earlier naming/version of the project. |
 | `packer/` | Archived VM image build files. |

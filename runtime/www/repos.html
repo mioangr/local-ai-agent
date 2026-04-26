@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Manage Repositories - Local AI Agent</title>
+  <link rel="stylesheet" href="/www/common.css">
+  <style>
+    :root {
+      --bg: #f4efe4;
+      --panel-bg: #fffdf8;
+      --ink: #18232f;
+      --muted: #5a6a78;
+      --accent: #0b6e4f;
+      --border: #d9d1c2;
+      --danger: #c53030;
+      --danger-bg: #fff5f5;
+    }
+    body {
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(11, 110, 79, 0.12), transparent 28%),
+        linear-gradient(180deg, #faf6ed 0%, var(--bg) 100%);
+    }
+    .dashboard-layout {
+      display: grid;
+      gap: 24px;
+      grid-template-columns: 1.1fr 0.9fr;
+    }
+    .hero,
+    .panel {
+      background: color-mix(in srgb, var(--panel-bg) 92%, white 8%);
+      border: 1px solid var(--border);
+      box-shadow: 0 18px 50px rgba(24, 35, 47, 0.08);
+    }
+    p {
+      color: var(--muted);
+    }
+    th,
+    td {
+      border-bottom: 1px solid var(--border);
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: rgba(11, 110, 79, 0.12);
+      color: var(--accent);
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+    .nav {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+    }
+    a {
+      color: var(--accent);
+    }
+    .repo-form {
+      background: var(--panel-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    .repo-form h2 {
+      margin-top: 0;
+    }
+    .repo-form input {
+      width: 100%;
+      border-radius: 12px;
+      padding: 12px 14px;
+      font: inherit;
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--ink);
+      box-sizing: border-box;
+    }
+    .repo-form label {
+      display: block;
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .repo-form .form-group {
+      margin-bottom: 16px;
+    }
+    .repo-form button {
+      background: var(--accent);
+      color: #fff;
+      font-weight: 700;
+      border: 0;
+      border-radius: 12px;
+      padding: 11px 16px;
+      font: inherit;
+      cursor: pointer;
+    }
+    .repo-form button.secondary {
+      background: var(--muted);
+    }
+    .repo-list {
+      background: var(--panel-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 24px;
+    }
+    .repo-list h2 {
+      margin-top: 0;
+    }
+    .repo-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      margin-bottom: 12px;
+      background: #fff;
+    }
+    .repo-item:last-child {
+      margin-bottom: 0;
+    }
+    .repo-info {
+      flex: 1;
+    }
+    .repo-name {
+      font-weight: 700;
+      font-size: 1.1rem;
+      margin-bottom: 4px;
+    }
+    .repo-url {
+      color: var(--muted);
+      font-size: 0.9rem;
+      word-break: break-all;
+    }
+    .repo-branch {
+      font-size: 0.85rem;
+      color: var(--accent);
+      margin-top: 4px;
+    }
+    .repo-actions {
+      display: flex;
+      gap: 8px;
+      margin-left: 16px;
+    }
+    .repo-actions button {
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--ink);
+    }
+    .repo-actions button.edit {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+    .repo-actions button.delete {
+      background: var(--danger-bg);
+      color: var(--danger);
+      border-color: var(--danger);
+    }
+    .empty-state {
+      text-align: center;
+      padding: 32px;
+      color: var(--muted);
+    }
+    .message {
+      padding: 12px 16px;
+      border-radius: 12px;
+      margin-bottom: 16px;
+    }
+    .message.success {
+      background: rgba(11, 110, 79, 0.12);
+      color: var(--accent);
+    }
+    .message.error {
+      background: var(--danger-bg);
+      color: var(--danger);
+    }
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <main class="dashboard-layout">
+    <section class="hero">
+      <div class="nav">
+        <span class="badge">Auth mode: {{ auth_mode }}</span>
+        <a href="/">Home</a>
+        <a href="/chat">AI Chat</a>
+        <a href="/status">System Status</a>
+        <a href="/updates">Check for updates</a>
+      </div>
+      <h1>Manage Repositories</h1>
+      <p>Add, edit, or remove Git repositories that the AI agent can work with.</p>
+      
+      {% if message %}
+      <div class="message {{ message_type }}">{{ message }}</div>
+      {% endif %}
+      
+      <div class="repo-form">
+        <h2 id="form-title">Add Repository</h2>
+        <form id="repo-form" method="post" action="/repos">
+          <input type="hidden" name="action" id="form-action" value="add">
+          <input type="hidden" name="original_name" id="original-name" value="">
+          
+          <div class="form-group">
+            <label for="name">Repository Name</label>
+            <input type="text" id="name" name="name" required placeholder="e.g., my-project">
+          </div>
+          
+          <div class="form-group">
+            <label for="url">Repository URL</label>
+            <input type="url" id="url" name="url" required placeholder="https://github.com/username/repo">
+          </div>
+          
+          <div class="form-group">
+            <label for="branch">Branch</label>
+            <input type="text" id="branch" name="branch" required value="main" placeholder="e.g., main">
+          </div>
+          
+          <button type="submit" id="submit-btn">Add Repository</button>
+          <button type="button" id="cancel-btn" class="secondary hidden" onclick="cancelEdit()">Cancel</button>
+        </form>
+      </div>
+    </section>
+    
+    <section class="panel">
+      <h2>Current Repositories</h2>
+      {% if repos %}
+      <div class="repo-list">
+        {% for repo in repos %}
+        <div class="repo-item">
+          <div class="repo-info">
+            <div class="repo-name">{{ repo.name }}</div>
+            <div class="repo-url">{{ repo.url }}</div>
+            <div class="repo-branch">Branch: {{ repo.branch }}</div>
+          </div>
+          <div class="repo-actions">
+            <button class="edit" onclick="editRepo('{{ repo.name }}', '{{ repo.url }}', '{{ repo.branch }}')">Edit</button>
+            <button class="delete" onclick="deleteRepo('{{ repo.name }}')">Delete</button>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="empty-state">
+        <p>No repositories configured yet.</p>
+        <p>Add your first repository using the form above.</p>
+      </div>
+      {% endif %}
+    </section>
+  </main>
+  
+  <script>
+    function editRepo(name, url, branch) {
+      document.getElementById('form-title').textContent = 'Edit Repository';
+      document.getElementById('form-action').value = 'edit';
+      document.getElementById('original-name').value = name;
+      document.getElementById('name').value = name;
+      document.getElementById('url').value = url;
+      document.getElementById('branch').value = branch;
+      document.getElementById('submit-btn').textContent = 'Save Changes';
+      document.getElementById('cancel-btn').classList.remove('hidden');
+      document.getElementById('name').focus();
+    }
+    
+    function cancelEdit() {
+      document.getElementById('form-title').textContent = 'Add Repository';
+      document.getElementById('form-action').value = 'add';
+      document.getElementById('original-name').value = '';
+      document.getElementById('name').value = '';
+      document.getElementById('url').value = '';
+      document.getElementById('branch').value = 'main';
+      document.getElementById('submit-btn').textContent = 'Add Repository';
+      document.getElementById('cancel-btn').classList.add('hidden');
+    }
+    
+    function deleteRepo(name) {
+      if (confirm('Are you sure you want to delete the repository "' + name + '"?')) {
+        var form = document.createElement('form');
+        form.method = 'post';
+        form.action = '/repos';
+        
+        var actionInput = document.createElement('input');
+        actionInput.type = 'hidden';
+        actionInput.name = 'action';
+        actionInput.value = 'delete';
+        form.appendChild(actionInput);
+        
+        var nameInput = document.createElement('input');
+        nameInput.type = 'hidden';
+        nameInput.name = 'name';
+        nameInput.value = name;
+        form.appendChild(nameInput);
+        
+        document.body.appendChild(form);
+        form.submit();
+      }
+    }
+  </script>
+</body>
+</html>

@@ -35,7 +35,15 @@ Its purpose is to keep the list of allowed repositories in one editable place ou
 
 ## Managing Repositories
 
-Edit the JSON file directly:
+**Recommended: Use the web UI**
+
+Open the web interface to add, edit, or delete repositories:
+
+```
+http://<your-server>:8000/repos
+```
+
+**Alternative: Edit the JSON file directly**
 
 ```bash
 nano /home/aiuser/local-ai-agent/settings/repos/repos.json

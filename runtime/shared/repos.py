@@ -36,3 +36,74 @@ def list_repositories() -> List[Dict[str, str]]:
 
 def get_repository_map() -> Dict[str, Dict[str, str]]:
     return {repo["name"]: repo for repo in list_repositories()}
+
+
+def save_repository_config(config: Dict) -> None:
+    """Save the complete repository configuration."""
+    CONFIG_FILE.parent.mkdir(parents=True, exist_ok=True)
+    with CONFIG_FILE.open("w", encoding="utf-8") as handle:
+        json.dump(config, handle, indent=2)
+
+
+def add_repository(name: str, url: str, branch: str = "main") -> Dict:
+    """Add a new repository to the configuration."""
+    config = load_repository_config()
+    repos = config.get("repos", [])
+    
+    # Check for duplicate name
+    for repo in repos:
+        if repo.get("name") == name:
+            raise ValueError(f"Repository '{name}' already exists")
+    
+    repos.append({
+        "name": name,
+        "url": url,
+        "branch": branch
+    })
+    
+    config["repos"] = repos
+    save_repository_config(config)
+    return {"name": name, "url": url, "branch": branch}
+
+
+def update_repository(original_name: str, name: str, url: str, branch: str) -> Dict:
+    """Update an existing repository."""
+    config = load_repository_config()
+    repos = config.get("repos", [])
+    
+    found = False
+    for repo in repos:
+        if repo.get("name") == original_name:
+            repo["name"] = name
+            repo["url"] = url
+            repo["branch"] = branch
+            found = True
+            break
+    
+    if not found:
+        raise ValueError(f"Repository '{original_name}' not found")
+    
+    # If name changed, check for duplicate
+    if original_name != name:
+        for repo in repos:
+            if repo.get("name") == name and repo.get("name") != original_name:
+                raise ValueError(f"Repository '{name}' already exists")
+    
+    config["repos"] = repos
+    save_repository_config(config)
+    return {"name": name, "url": url, "branch": branch}
+
+
+def delete_repository(name: str) -> None:
+    """Delete a repository from the configuration."""
+    config = load_repository_config()
+    repos = config.get("repos", [])
+    
+    original_count = len(repos)
+    repos = [repo for repo in repos if repo.get("name") != name]
+    
+    if len(repos) == original_count:
+        raise ValueError(f"Repository '{name}' not found")
+    
+    config["repos"] = repos
+    save_repository_config(config)
