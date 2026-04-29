@@ -19,7 +19,13 @@ import requests
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from runtime.api.services.redis_client import get_redis_client
-from runtime.api.services.ollama import chat_with_model, list_installed_models
+from runtime.api.services.ollama import (
+    chat_with_model,
+    install_model,
+    list_component_models,
+    list_installed_models,
+    uninstall_model,
+)
 from runtime.api.services.repositories import get_all_projects, get_project_map
 from runtime.api.services.tasks import create_and_submit_task, get_recent_tasks, get_task_by_id
 from runtime.shared.logging_utils import APP_LOG_FILE, configure_file_logger, ensure_log_dir
@@ -85,6 +91,20 @@ class ChatResponse(BaseModel):
     history: List[ChatMessage]
 
 
+class ComponentModelResponse(BaseModel):
+    name: str
+    display_name: str
+    family: str
+    parameters: str
+    disk_gb: float
+    memory_gb: Optional[int] = None
+    description: str
+    installed: bool
+    installed_size_gb: float
+    modified_at: str
+    details: Dict[str, Any]
+
+
 def read_log_text(max_lines: int = 1000) -> tuple[str, int]:
     ensure_log_dir()
     if not APP_LOG_FILE.exists():
@@ -112,6 +132,20 @@ def get_models_context() -> Dict[str, Any]:
             "models": [],
             "model_names": [],
             "models_error": f"Could not load installed models: {exc}",
+        }
+
+
+def get_components_context() -> Dict[str, Any]:
+    try:
+        return {
+            "models": list_component_models(),
+            "models_error": "",
+        }
+    except requests.RequestException as exc:
+        app_logger.warning("Could not load Ollama model components: %s", exc)
+        return {
+            "models": [],
+            "models_error": f"Could not load model components: {exc}",
         }
 
 
@@ -214,6 +248,44 @@ def list_models():
         "models": context["models"],
         "error": context["models_error"],
     }
+
+
+@app.get("/api/components/models", response_model=List[ComponentModelResponse])
+def list_model_components():
+    try:
+        return [ComponentModelResponse(**model) for model in list_component_models()]
+    except requests.RequestException as exc:
+        raise HTTPException(status_code=502, detail=f"Ollama request failed: {exc}") from exc
+
+
+@app.post("/api/components/models/{model_name:path}")
+def install_model_component(model_name: str):
+    try:
+        install_model(model_name)
+        app_logger.info("Installed Ollama model component %s", model_name)
+        return {
+            "status": "installed",
+            "model": model_name,
+            "models": list_component_models(),
+        }
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except requests.RequestException as exc:
+        raise HTTPException(status_code=502, detail=f"Ollama install failed: {exc}") from exc
+
+
+@app.delete("/api/components/models/{model_name:path}")
+def uninstall_model_component(model_name: str):
+    try:
+        uninstall_model(model_name)
+        app_logger.info("Uninstalled Ollama model component %s", model_name)
+        return {
+            "status": "uninstalled",
+            "model": model_name,
+            "models": list_component_models(),
+        }
+    except requests.RequestException as exc:
+        raise HTTPException(status_code=502, detail=f"Ollama uninstall failed: {exc}") from exc
 
 
 @app.get("/api/tasks", response_model=List[TaskResponse])
@@ -325,6 +397,20 @@ def chat_page(request: Request):
             "auth_mode": AUTH_MODE,
             "model_names": models_context["model_names"],
             "models_error": models_context["models_error"],
+        },
+    )
+
+
+@app.get("/add-remove-components", response_class=HTMLResponse)
+def add_remove_components_page(request: Request):
+    context = get_components_context()
+    return templates.TemplateResponse(
+        request=request,
+        name="add-remove-components.html",
+        context={
+            "auth_mode": AUTH_MODE,
+            "models": context["models"],
+            "models_error": context["models_error"],
         },
     )
 

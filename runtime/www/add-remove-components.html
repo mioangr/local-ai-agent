@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Add or Remove Components</title>
+  <link rel="stylesheet" href="/www/common.css">
+  <style>
+    :root {
+      --bg: #edf2ef;
+      --panel-bg: #fffefb;
+      --ink: #18232f;
+      --muted: #586b73;
+      --accent: #0b6e4f;
+      --accent-soft: #dcece5;
+      --danger: #9f2f23;
+      --danger-soft: #f8dfda;
+      --border: #cfd9d4;
+      --table-bg: #ffffff;
+    }
+    body {
+      color: var(--ink);
+      background:
+        linear-gradient(135deg, rgba(11, 110, 79, 0.10), transparent 30%),
+        linear-gradient(180deg, #fbf8f0 0%, var(--bg) 100%);
+    }
+    .components-shell {
+      width: min(1180px, calc(100% - 32px));
+      margin: 32px auto 48px;
+    }
+    .panel {
+      background: var(--panel-bg);
+      border: 1px solid var(--border);
+      box-shadow: 0 18px 50px rgba(24, 35, 47, 0.08);
+    }
+    .intro {
+      margin-bottom: 24px;
+    }
+    p,
+    .muted,
+    .statusline {
+      color: var(--muted);
+    }
+    a {
+      color: var(--accent);
+    }
+    .site-nav__badge {
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+    .site-nav__link {
+      color: var(--accent);
+    }
+    .site-nav__link.is-active {
+      background: var(--accent-soft);
+      border-color: rgba(11, 110, 79, 0.22);
+    }
+    .toolbar {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      margin: 22px 0;
+    }
+    .summary {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 34px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(11, 110, 79, 0.10);
+      color: var(--accent);
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+    .refresh-button,
+    .action-button {
+      width: auto;
+      border: 1px solid var(--border);
+      font-weight: 700;
+    }
+    .refresh-button,
+    .install-button {
+      background: var(--accent);
+      color: #fff;
+    }
+    .remove-button {
+      background: var(--danger-soft);
+      color: var(--danger);
+    }
+    .components-table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: var(--table-bg);
+    }
+    .components-table {
+      min-width: 900px;
+      background: var(--table-bg);
+    }
+    th,
+    td {
+      border-bottom: 1px solid var(--border);
+    }
+    tbody tr:last-child td {
+      border-bottom: 0;
+    }
+    .model-title {
+      display: block;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .model-name {
+      display: block;
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: 0.84rem;
+      overflow-wrap: anywhere;
+    }
+    .state {
+      display: inline-flex;
+      align-items: center;
+      min-height: 30px;
+      border-radius: 999px;
+      padding: 4px 9px;
+      font-size: 0.86rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .state-installed {
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+    .state-available {
+      background: #f1eee7;
+      color: var(--muted);
+    }
+    .statusline {
+      min-height: 24px;
+      margin-top: 14px;
+    }
+    .models-error {
+      padding: 14px 16px;
+      border-radius: 14px;
+      background: var(--danger-soft);
+      color: var(--danger);
+      margin-top: 16px;
+    }
+    .description-cell {
+      max-width: 280px;
+      line-height: 1.45;
+    }
+    .action-cell {
+      min-width: 150px;
+    }
+    @media (max-width: 720px) {
+      .toolbar {
+        align-items: stretch;
+      }
+      .refresh-button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="components-shell">
+    <section class="panel">
+      <div class="site-nav">
+        <span class="site-nav__badge">Auth mode: {{ auth_mode }}</span>
+        <a class="site-nav__link" href="/">Home</a>
+        <a class="site-nav__link" href="/chat">AI Chat</a>
+        <a class="site-nav__link" href="/status">System Status</a>
+        <a class="site-nav__link" href="/updates">Check for updates</a>
+        <a class="site-nav__link" href="/repos">Manage Repos</a>
+        <a class="site-nav__link is-active" href="/add-remove-components">Components</a>
+      </div>
+
+      <div class="intro">
+        <h1>Add or Remove Components</h1>
+        <p>Install or remove local Ollama models after setup. The installed state is discovered from Ollama each time this page loads or refreshes.</p>
+      </div>
+
+      <div class="toolbar">
+        <div class="summary">
+          <span class="pill" id="installed-count">Installed: 0</span>
+          <span class="pill" id="disk-total">Installed disk: 0 GB</span>
+        </div>
+        <button class="refresh-button" id="refresh-button" type="button">Refresh</button>
+      </div>
+
+      {% if models_error %}
+      <div class="models-error">{{ models_error }}</div>
+      {% endif %}
+
+      <div class="components-table-wrap">
+        <table class="components-table">
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>Status</th>
+              <th>Disk</th>
+              <th>Memory</th>
+              <th>Use</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="components-body"></tbody>
+        </table>
+      </div>
+      <div class="statusline" id="statusline"></div>
+    </section>
+  </main>
+
+  <script>
+    let models = {{ models | tojson }};
+    const body = document.getElementById("components-body");
+    const statusline = document.getElementById("statusline");
+    const refreshButton = document.getElementById("refresh-button");
+    const installedCount = document.getElementById("installed-count");
+    const diskTotal = document.getElementById("disk-total");
+
+    function formatGb(value) {
+      const numberValue = Number(value || 0);
+      if (!numberValue) {
+        return "Unknown";
+      }
+      return `${numberValue.toFixed(numberValue >= 10 ? 0 : 1)} GB`;
+    }
+
+    function setBusy(modelName, busy) {
+      document.querySelectorAll("[data-model-action]").forEach((button) => {
+        button.disabled = busy;
+      });
+      refreshButton.disabled = busy;
+    }
+
+    function renderModels() {
+      body.textContent = "";
+
+      let installed = 0;
+      let installedDisk = 0;
+
+      models.forEach((model) => {
+        if (model.installed) {
+          installed += 1;
+          installedDisk += Number(model.installed_size_gb || model.disk_gb || 0);
+        }
+
+        const row = document.createElement("tr");
+
+        const modelCell = document.createElement("td");
+        const title = document.createElement("span");
+        title.className = "model-title";
+        title.textContent = model.display_name || model.name;
+        const name = document.createElement("span");
+        name.className = "model-name";
+        name.textContent = model.name;
+        modelCell.append(title, name);
+
+        const statusCell = document.createElement("td");
+        const state = document.createElement("span");
+        state.className = `state ${model.installed ? "state-installed" : "state-available"}`;
+        state.textContent = model.installed ? "Installed" : "Available";
+        statusCell.appendChild(state);
+
+        const diskCell = document.createElement("td");
+        diskCell.textContent = model.installed_size_gb ? formatGb(model.installed_size_gb) : formatGb(model.disk_gb);
+
+        const memoryCell = document.createElement("td");
+        memoryCell.textContent = model.memory_gb ? `${model.memory_gb}+ GB RAM` : "Unknown";
+
+        const descriptionCell = document.createElement("td");
+        descriptionCell.className = "description-cell";
+        descriptionCell.textContent = model.description || "";
+
+        const actionCell = document.createElement("td");
+        actionCell.className = "action-cell";
+        const action = document.createElement("button");
+        action.type = "button";
+        action.className = `action-button ${model.installed ? "remove-button" : "install-button"}`;
+        action.dataset.modelAction = model.name;
+        action.textContent = model.installed ? "Uninstall" : "Install";
+        action.addEventListener("click", () => model.installed ? uninstallModel(model.name) : installModel(model.name));
+        actionCell.appendChild(action);
+
+        row.append(modelCell, statusCell, diskCell, memoryCell, descriptionCell, actionCell);
+        body.appendChild(row);
+      });
+
+      installedCount.textContent = `Installed: ${installed}`;
+      diskTotal.textContent = `Installed disk: ${installedDisk ? formatGb(installedDisk) : "0 GB"}`;
+    }
+
+    async function refreshModels(message = "Model list refreshed.") {
+      refreshButton.disabled = true;
+      statusline.textContent = "Checking Ollama...";
+      try {
+        const response = await fetch("/api/components/models");
+        const payload = await response.json();
+        if (!response.ok) {
+          throw new Error(payload.detail || "Could not refresh models.");
+        }
+        models = payload;
+        renderModels();
+        statusline.textContent = message;
+      } catch (error) {
+        statusline.textContent = error instanceof Error ? error.message : "Could not refresh models.";
+      } finally {
+        refreshButton.disabled = false;
+      }
+    }
+
+    async function installModel(modelName) {
+      statusline.textContent = `Installing ${modelName}. This can take several minutes.`;
+      setBusy(modelName, true);
+      try {
+        const response = await fetch(`/api/components/models/${encodeURIComponent(modelName)}`, {
+          method: "POST",
+        });
+        const payload = await response.json();
+        if (!response.ok) {
+          throw new Error(payload.detail || "Install failed.");
+        }
+        models = payload.models;
+        renderModels();
+        statusline.textContent = `${modelName} is installed.`;
+      } catch (error) {
+        statusline.textContent = error instanceof Error ? error.message : "Install failed.";
+      } finally {
+        setBusy(modelName, false);
+      }
+    }
+
+    async function uninstallModel(modelName) {
+      if (!confirm(`Uninstall ${modelName}?`)) {
+        return;
+      }
+
+      statusline.textContent = `Uninstalling ${modelName}...`;
+      setBusy(modelName, true);
+      try {
+        const response = await fetch(`/api/components/models/${encodeURIComponent(modelName)}`, {
+          method: "DELETE",
+        });
+        const payload = await response.json();
+        if (!response.ok) {
+          throw new Error(payload.detail || "Uninstall failed.");
+        }
+        models = payload.models;
+        renderModels();
+        statusline.textContent = `${modelName} was removed.`;
+      } catch (error) {
+        statusline.textContent = error instanceof Error ? error.message : "Uninstall failed.";
+      } finally {
+        setBusy(modelName, false);
+      }
+    }
+
+    refreshButton.addEventListener("click", () => refreshModels());
+    renderModels();
+  </script>
+</body>
+</html>
